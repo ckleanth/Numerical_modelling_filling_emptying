@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Numerical Modelling of Filling &amp; Emptying Systems — Course Notes</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\\[','\\]']],
+    tags: 'none'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js" id="MathJax-script" async></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<style>
+:root{
+  --ink:#16202B; --ink-soft:#33424F; --muted:#5C6E7C;
+  --paper:#EEF1F4; --surface:#FFFFFF; --line:#D7DEE4; --line-soft:#E7ECF0;
+  --teal:#0E6B79; --teal-deep:#0A4E59; --teal-tint:#E3EEF0;
+  --amber:#B86A12; --amber-ink:#7A4708; --amber-tint:#F8EEDD;
+  --rasp:#A8345F; --rasp-tint:#F6E6EE;
+  --code-bg:#21262d; --code-bar:#171b21;
+  --font-display:'Space Grotesk','Segoe UI',system-ui,sans-serif;
+  --font-body:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --measure:46rem;
+  --sidebar:20rem;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--font-body); font-size:18px; line-height:1.72;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+
+/* ---------- layout ---------- */
+.wrap{display:flex; align-items:flex-start; gap:0;}
+.sidebar{
+  width:var(--sidebar); flex:0 0 var(--sidebar);
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  background:var(--ink); color:#C9D4DC;
+  padding:2rem 1.35rem 3rem;
+}
+.main{flex:1 1 auto; min-width:0; padding:0 clamp(1.1rem,5vw,4.5rem);}
+.col{max-width:var(--measure); margin:0 auto;}
+
+/* ---------- sidebar / TOC ---------- */
+.brandmark{font-family:var(--font-mono); font-size:.66rem; letter-spacing:.28em; text-transform:uppercase; color:var(--teal); }
+.sidebar h1{
+  font-family:var(--font-display); font-weight:600; font-size:1.18rem; line-height:1.25;
+  margin:.55rem 0 .15rem; color:#F4F7F9; letter-spacing:-.01em;
+}
+.sidebar .sub{font-size:.82rem; color:#8FA0AC; margin:0 0 1.6rem; line-height:1.4;}
+.toc{list-style:none; margin:0; padding:0; font-family:var(--font-display);}
+.toc .part{
+  font-size:.62rem; letter-spacing:.2em; text-transform:uppercase;
+  color:#6F8390; margin:1.35rem 0 .45rem; font-weight:600;
+}
+.toc a{
+  display:block; color:#AFBCC6; text-decoration:none; font-size:.84rem;
+  padding:.28rem 0 .28rem .85rem; border-left:2px solid transparent; line-height:1.3;
+  transition:color .15s, border-color .15s;
+}
+.toc a .n{color:var(--teal); font-variant-numeric:tabular-nums; margin-right:.55rem; font-weight:500;}
+.toc a:hover{color:#fff;}
+.toc a.active{color:#fff; border-left-color:var(--amber);}
+.toc a.active .n{color:var(--amber);}
+
+/* ---------- mobile bar ---------- */
+.topbar{display:none;}
+
+/* ---------- hero ---------- */
+.hero{padding:clamp(2.4rem,6vw,4.6rem) 0 1.4rem;}
+.eyebrow{
+  font-family:var(--font-mono); font-size:.72rem; letter-spacing:.26em; text-transform:uppercase;
+  color:var(--teal); margin:0 0 1rem;
+}
+.hero h2{
+  font-family:var(--font-display); font-weight:700; letter-spacing:-.02em; line-height:1.04;
+  font-size:clamp(2.1rem,5.4vw,3.5rem); margin:0 0 1rem; color:var(--ink);
+}
+.hero .lede{font-size:1.18rem; color:var(--ink-soft); margin:0 0 1.6rem;}
+.heroschematic{
+  background:var(--surface); border:1px solid var(--line); border-radius:8px;
+  padding:1.1rem 1.1rem .7rem; margin:1.8rem 0; box-shadow:0 1px 0 rgba(22,32,43,.03);
+}
+.heroschematic svg{display:block; width:100%; height:auto;}
+.fig-cap{font-size:.84rem; color:var(--muted); margin:.55rem .15rem 0; line-height:1.45;}
+.fig-cap b{color:var(--ink-soft); font-weight:600;}
+
+/* ---------- prose & headings ---------- */
+.main h3{ /* Part header */
+  font-family:var(--font-display); font-weight:600; letter-spacing:-.01em;
+  font-size:1.95rem; line-height:1.1; margin:3.6rem 0 .2rem; color:var(--teal-deep);
+  padding-top:1.4rem; border-top:1px solid var(--line);
+}
+.partkicker{font-family:var(--font-mono); font-size:.7rem; letter-spacing:.24em; text-transform:uppercase; color:var(--amber); margin:0;}
+.main h4{ /* Lecture */
+  font-family:var(--font-display); font-weight:600; font-size:1.42rem; line-height:1.18;
+  margin:2.8rem 0 .9rem; color:var(--ink); letter-spacing:-.01em;
+}
+.main h4 .lec{color:var(--teal); font-family:var(--font-mono); font-size:.92rem; font-weight:500; margin-right:.5rem; letter-spacing:.02em;}
+.main h5{
+  font-family:var(--font-display); font-weight:600; font-size:1.06rem; margin:1.9rem 0 .55rem; color:var(--ink-soft);
+}
+.main p{margin:0 0 1.1rem;}
+.main a{color:var(--teal); text-decoration:underline; text-decoration-color:var(--teal-tint); text-underline-offset:2px;}
+.main a:hover{text-decoration-color:var(--teal);}
+.main strong{font-weight:600; color:var(--ink);}
+.main em{color:var(--ink-soft);}
+.lead{font-size:1.1rem; color:var(--ink-soft);}
+ul,ol{margin:0 0 1.2rem; padding-left:1.3rem;}
+li{margin:.32rem 0;}
+li::marker{color:var(--teal);}
+.tight li{margin:.1rem 0;}
+hr.soft{border:none; border-top:1px solid var(--line-soft); margin:2.2rem 0;}
+
+/* ---------- code ---------- */
+pre{margin:1.2rem 0; border-radius:8px; overflow:hidden; border:1px solid #11151a;}
+pre>.codebar{
+  background:var(--code-bar); color:#8b98a5; font-family:var(--font-mono);
+  font-size:.72rem; letter-spacing:.04em; padding:.5rem .9rem; display:flex; justify-content:space-between;
+  border-bottom:1px solid #000;
+}
+pre>.codebar .tag{color:var(--teal); text-transform:uppercase; letter-spacing:.14em;}
+pre code.hljs{
+  font-family:var(--font-mono); font-size:.82rem; line-height:1.6; padding:1rem 1.1rem; background:var(--code-bg);
+}
+code.inl{
+  font-family:var(--font-mono); font-size:.86em; background:#e9eef2; color:var(--teal-deep);
+  padding:.08em .38em; border-radius:4px; border:1px solid #dbe3e9;
+}
+
+/* ---------- callouts ---------- */
+.box{
+  border:1px solid var(--line); border-left:4px solid var(--teal);
+  background:var(--surface); border-radius:6px; padding:1rem 1.15rem; margin:1.5rem 0;
+}
+.box .lab{
+  font-family:var(--font-display); font-weight:600; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--teal); margin:0 0 .4rem; display:block;
+}
+.box p:last-child{margin-bottom:0;}
+.box.def{border-left-color:var(--teal); background:var(--teal-tint);}
+.box.def .lab{color:var(--teal-deep);}
+.box.key{border-left-color:var(--ink); }
+.box.key .lab{color:var(--ink);}
+.box.warn{border-left-color:var(--rasp); background:var(--rasp-tint);}
+.box.warn .lab{color:var(--rasp);}
+.box.code-note{border-left-color:var(--amber); background:var(--amber-tint);}
+.box.code-note .lab{color:var(--amber-ink);}
+.box.code-note code.inl{background:#f0e4cf; color:var(--amber-ink); border-color:#e6d6b8;}
+
+/* ---------- equations ---------- */
+.eq{
+  margin:1.4rem 0; padding:.2rem 0; display:flex; align-items:center; gap:1rem;
+  overflow-x:auto; overflow-y:hidden;
+}
+.eq .body{flex:1 1 auto; text-align:center;}
+.eq .eqn{flex:0 0 auto; font-family:var(--font-mono); font-size:.78rem; color:var(--muted); white-space:nowrap;}
+mjx-container{overflow-x:auto; overflow-y:hidden; max-width:100%;}
+
+/* ---------- figures ---------- */
+.figure{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:1.1rem 1.1rem .7rem; margin:1.7rem 0;}
+.figure svg{display:block; width:100%; height:auto;}
+
+/* ---------- tables ---------- */
+.tablewrap{overflow-x:auto; margin:1.4rem 0;}
+table{border-collapse:collapse; width:100%; font-size:.9rem; background:var(--surface);}
+caption{caption-side:top; text-align:left; font-size:.84rem; color:var(--muted); margin-bottom:.5rem;}
+th,td{border:1px solid var(--line); padding:.5rem .7rem; text-align:left; vertical-align:top;}
+thead th{background:var(--ink); color:#EAEFF2; font-family:var(--font-display); font-weight:500; font-size:.82rem; letter-spacing:.02em;}
+tbody tr:nth-child(even){background:#f6f8fa;}
+td code, th code{font-family:var(--font-mono); font-size:.84em;}
+
+/* ---------- interactive demo ---------- */
+.demo{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:1.2rem; margin:1.8rem 0;}
+.demo h5{margin:0 0 .2rem;}
+.demo .demo-sub{font-size:.86rem; color:var(--muted); margin:0 0 1rem;}
+.demo-grid{display:grid; grid-template-columns:1.35fr 1fr; gap:1.2rem; align-items:stretch;}
+.demo canvas{width:100%; height:auto; background:#0c1117; border-radius:8px; border:1px solid #11151a;}
+.controls{display:flex; flex-direction:column; gap:.85rem; font-family:var(--font-display);}
+.controls label{font-size:.78rem; color:var(--ink-soft); display:flex; justify-content:space-between; gap:.5rem; font-weight:500;}
+.controls label .val{font-family:var(--font-mono); color:var(--teal-deep); font-size:.78rem;}
+.controls input[type=range]{width:100%; accent-color:var(--teal); margin-top:.15rem;}
+.controls .btnrow{display:flex; gap:.6rem; margin-top:.3rem;}
+.controls button{
+  font-family:var(--font-display); font-weight:600; font-size:.82rem; cursor:pointer;
+  border:1px solid var(--teal); background:var(--teal); color:#fff; padding:.5rem .9rem; border-radius:6px; flex:1;
+}
+.controls button.ghost{background:transparent; color:var(--teal);}
+.controls button:hover{background:var(--teal-deep); border-color:var(--teal-deep); color:#fff;}
+.controls button.ghost:hover{color:#fff;}
+.readout{font-family:var(--font-mono); font-size:.74rem; color:var(--muted); line-height:1.5; margin-top:.2rem;}
+.readout b{color:var(--ink); font-weight:500;}
+
+/* ---------- footer ---------- */
+.footer{border-top:1px solid var(--line); margin:4rem 0 0; padding:2rem 0 4rem; color:var(--muted); font-size:.85rem;}
+.footer code.inl{font-size:.8em;}
+
+/* ---------- reveal animation ---------- */
+.reveal{opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease;}
+.reveal.in{opacity:1; transform:none;}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1; transform:none; transition:none;}}
+
+/* ---------- responsive ---------- */
+@media (max-width:980px){
+  :root{--sidebar:0;}
+  .sidebar{position:fixed; left:0; top:0; z-index:40; width:min(82vw,20rem); flex-basis:auto;
+           transform:translateX(-100%); transition:transform .28s ease; box-shadow:0 0 40px rgba(0,0,0,.35);}
+  body.nav-open .sidebar{transform:none;}
+  .topbar{display:flex; position:sticky; top:0; z-index:30; align-items:center; gap:.8rem;
+          background:var(--ink); color:#fff; padding:.7rem 1rem;}
+  .topbar .navbtn{background:transparent; border:1px solid #3a4a57; color:#fff; border-radius:6px;
+          font-family:var(--font-mono); font-size:.75rem; padding:.4rem .7rem; cursor:pointer; letter-spacing:.1em;}
+  .topbar .ttl{font-family:var(--font-display); font-weight:600; font-size:.9rem;}
+  .scrim{display:none; position:fixed; inset:0; background:rgba(10,15,20,.5); z-index:35;}
+  body.nav-open .scrim{display:block;}
+  .demo-grid{grid-template-columns:1fr;}
+  body{font-size:17px;}
+}
+@media print{
+  .sidebar,.topbar,.scrim,.demo .controls{display:none!important;}
+  body{background:#fff; font-size:11pt;}
+  .main{padding:0;} pre{break-inside:avoid;} .box,.figure,.eq{break-inside:avoid;}
+}
+
+/* ============================================================
+   CONTENT PROTECTION (CSS layer)
+   Disables text selection, native drag, the iOS long-press
+   callout, and screen-/PDF-printing. Form controls remain
+   fully usable. This is a deterrent, not absolute security.
+   ============================================================ */
+html, body{
+  -webkit-user-select:none !important;
+  -moz-user-select:none !important;
+  -ms-user-select:none !important;
+  user-select:none !important;
+  -webkit-touch-callout:none !important;
+}
+/* keep any interactive fields functional */
+input, textarea{
+  -webkit-user-select:text !important;
+  user-select:text !important;
+}
+/* defeat "drag the text/image out" extraction */
+a, img, svg, canvas{
+  -webkit-user-drag:none !important;
+  user-drag:none !important;
+}
+/* if a selection is ever forced, render it invisible */
+::selection{ background:transparent !important; }
+::-moz-selection{ background:transparent !important; }
+
+/* block printing / print-to-PDF as an extraction route */
+@media print{
+  body *{ visibility:hidden !important; }
+  body::before{
+    content:"This document is protected \2014 printing has been disabled.";
+    visibility:visible !important;
+    display:block; position:fixed; inset:40% 0 auto 0;
+    text-align:center; font:600 16pt 'Space Grotesk',system-ui,sans-serif; color:#000;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="navbtn" id="navbtn" aria-label="Toggle contents">☰ CONTENTS</button>
+  <span class="ttl">Filling &amp; Emptying Models</span>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<div class="wrap">
+<aside class="sidebar" id="sidebar">
+  <div class="brandmark">Thermo-Fluid Systems · Lecture Series</div>
+  <h1>Numerical Modelling of Filling &amp; Emptying Systems</h1>
+  <p class="sub">From the conservation laws to reacting, multi-volume engine simulations</p>
+  <nav>
+  <ul class="toc">
+    <li><a href="#top"><span class="n">00</span>Overview &amp; how to use these notes</a></li>
+
+    <li class="part">Part I · Foundations</li>
+    <li><a href="#l1"><span class="n">1</span>What a numerical model is</a></li>
+    <li><a href="#l2"><span class="n">2</span>The lumped control volume</a></li>
+    <li><a href="#l3"><span class="n">3</span>Integrating ODEs in time</a></li>
+
+    <li class="part">Part II · The Filling &amp; Emptying Model</li>
+    <li><a href="#l4"><span class="n">4</span>One chamber: mass &amp; energy</a></li>
+    <li><a href="#l5"><span class="n">5</span>Moving boundaries &amp; work</a></li>
+    <li><a href="#l6"><span class="n">6</span>Resistances: orifices &amp; flow</a></li>
+    <li><a href="#l7"><span class="n">7</span>Heat transfer</a></li>
+    <li><a href="#l8"><span class="n">8</span>Numerical robustness</a></li>
+
+    <li class="part">Part III · Real Fluids &amp; Phase Change</li>
+    <li><a href="#l9"><span class="n">9</span>Property models &amp; the flash</a></li>
+    <li><a href="#l10"><span class="n">10</span>Compressible &amp; flashing flow · Model A</a></li>
+
+    <li class="part">Part IV · Reacting Flows</li>
+    <li><a href="#l11"><span class="n">11</span>Chemistry in a CV · Model B</a></li>
+
+    <li class="part">Part V · Coupled Systems</li>
+    <li><a href="#l12"><span class="n">12</span>Networks of volumes · Model C</a></li>
+
+    <li class="part">Part VI · Practice</li>
+    <li><a href="#l13"><span class="n">13</span>Verification &amp; validation</a></li>
+    <li><a href="#appx"><span class="n">A</span>Reference &amp; exercises</a></li>
+  </ul>
+  </nav>
+</aside>
+
+<main class="main">
+<div class="col">
+<header class="hero" id="top">
+  <p class="eyebrow">Numerical Modelling · Course Notes By George Constandinides</p>
+  <h2>Filling &amp; Emptying Models</h2>
+  <p class="lede">How engineers turn the conservation laws into running code &mdash; building from a single rigid tank of ideal gas, one equation at a time, to a reacting, phase-changing, multi-cylinder engine.</p>
+
+  <div class="heroschematic reveal">
+    <svg viewBox="0 0 920 380" role="img" aria-label="Schematic of a filling and emptying control volume">
+      <defs>
+        <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.2" orient="auto">
+          <path d="M0,0 L9,4.2 L0,8.4 Z" fill="#0E6B79"/>
+        </marker>
+        <marker id="ahA" markerWidth="9" markerHeight="9" refX="7" refY="4.2" orient="auto">
+          <path d="M0,0 L9,4.2 L0,8.4 Z" fill="#B86A12"/>
+        </marker>
+        <marker id="ahK" markerWidth="9" markerHeight="9" refX="7" refY="4.2" orient="auto">
+          <path d="M0,0 L9,4.2 L0,8.4 Z" fill="#16202B"/>
+        </marker>
+      </defs>
+      <style>
+        .lbl{font-family:'Space Grotesk',sans-serif;}
+        .mono{font-family:'JetBrains Mono',monospace;}
+      </style>
+
+      <!-- supply reservoir -->
+      <rect x="36" y="150" width="120" height="92" rx="8" fill="#E3EEF0" stroke="#0E6B79" stroke-width="2"/>
+      <text class="lbl" x="96" y="184" text-anchor="middle" font-size="15" font-weight="600" fill="#0A4E59">supply</text>
+      <text class="mono" x="96" y="206" text-anchor="middle" font-size="12" fill="#0A4E59">p_s , T_s</text>
+      <text class="lbl" x="96" y="226" text-anchor="middle" font-size="11" fill="#5C6E7C">(reservoir)</text>
+
+      <!-- inlet pipe + valve -->
+      <line x1="156" y1="196" x2="250" y2="196" stroke="#0E6B79" stroke-width="3"/>
+      <path d="M243,186 l0,20 M243,186 l-13,10 l13,10 Z" fill="#0E6B79" stroke="#0E6B79" stroke-width="1.5"/>
+      <path d="M243,186 l13,10 l-13,10" fill="none" stroke="#0E6B79" stroke-width="1.5"/>
+      <line x1="256" y1="196" x2="352" y2="196" stroke="#0E6B79" stroke-width="3" marker-end="url(#ah)"/>
+      <text class="mono" x="250" y="172" text-anchor="middle" font-size="12" fill="#0E6B79">mdot_in</text>
+      <text class="lbl" x="250" y="232" text-anchor="middle" font-size="11" fill="#5C6E7C">resistance · valve</text>
+
+      <!-- cylinder body -->
+      <rect x="360" y="150" width="200" height="170" rx="6" fill="#FFFFFF" stroke="#16202B" stroke-width="2.5"/>
+      <!-- piston -->
+      <rect x="364" y="150" width="192" height="26" rx="3" fill="#33424F"/>
+      <rect x="453" y="96" width="14" height="56" fill="#33424F"/>
+      <rect x="430" y="86" width="60" height="14" rx="3" fill="#16202B"/>
+      <!-- work arrow -->
+      <line x1="460" y1="86" x2="460" y2="40" stroke="#16202B" stroke-width="2.5" marker-end="url(#ahK)"/>
+      <text class="mono" x="476" y="58" font-size="12" fill="#16202B">W = p·dV/dt</text>
+      <!-- inside labels -->
+      <text class="lbl" x="460" y="214" text-anchor="middle" font-size="13" font-weight="600" fill="#16202B">control volume</text>
+      <rect x="392" y="226" width="136" height="30" rx="6" fill="#E3EEF0" stroke="#0E6B79" stroke-width="1.5"/>
+      <text class="mono" x="460" y="246" text-anchor="middle" font-size="14" font-weight="700" fill="#0A4E59">state: (m, U, V)</text>
+      <text class="mono" x="460" y="286" text-anchor="middle" font-size="12" fill="#5C6E7C">p, T, ρ, h, x = f(m,U,V)</text>
+
+      <!-- heat arrows -->
+      <path d="M404,372 q6,-14 0,-28 q-6,-14 0,-28" fill="none" stroke="#B86A12" stroke-width="2.4" marker-end="url(#ahA)"/>
+      <path d="M460,372 q6,-14 0,-28 q-6,-14 0,-28" fill="none" stroke="#B86A12" stroke-width="2.4" marker-end="url(#ahA)"/>
+      <path d="M516,372 q6,-14 0,-28 q-6,-14 0,-28" fill="none" stroke="#B86A12" stroke-width="2.4" marker-end="url(#ahA)"/>
+      <text class="mono" x="552" y="360" font-size="12" fill="#B86A12">Q (wall heat)</text>
+
+      <!-- outlet pipe + valve -->
+      <line x1="560" y1="196" x2="664" y2="196" stroke="#0E6B79" stroke-width="3"/>
+      <path d="M657,186 l0,20 M657,186 l-13,10 l13,10 Z" fill="#0E6B79" stroke="#0E6B79" stroke-width="1.5"/>
+      <path d="M657,186 l13,10 l-13,10" fill="none" stroke="#0E6B79" stroke-width="1.5"/>
+      <line x1="670" y1="196" x2="762" y2="196" stroke="#0E6B79" stroke-width="3" marker-end="url(#ah)"/>
+      <text class="mono" x="664" y="172" text-anchor="middle" font-size="12" fill="#0E6B79">mdot_out</text>
+
+      <!-- receiver reservoir -->
+      <rect x="766" y="150" width="120" height="92" rx="8" fill="#E3EEF0" stroke="#0E6B79" stroke-width="2"/>
+      <text class="lbl" x="826" y="184" text-anchor="middle" font-size="15" font-weight="600" fill="#0A4E59">receiver</text>
+      <text class="mono" x="826" y="206" text-anchor="middle" font-size="12" fill="#0A4E59">p_d , T_d</text>
+      <text class="lbl" x="826" y="226" text-anchor="middle" font-size="11" fill="#5C6E7C">(reservoir)</text>
+    </svg>
+    <p class="fig-cap"><b>Fig. 0.1 — The canonical filling/emptying control volume.</b> A lumped chamber stores mass and energy. Resistive ports (valves, orifices, pipes) set the flow rates from pressure differences; a moving piston exchanges boundary work; the wall exchanges heat. Every model in this course is an elaboration of this one picture.</p>
+  </div>
+
+  <p class="lead">These notes teach the <em>principles of numerical modelling</em> through one richly developed example: the <strong>filling and emptying model</strong>. We begin with what a model <em>is</em> and why we integrate conserved quantities, then assemble the governing equations piece by piece. Three working Python programs &mdash; supplied alongside these notes &mdash; are introduced exactly where the theory motivates them, each adding one layer of physics.</p>
+
+  <div class="box key">
+    <span class="lab">How to use these notes</span>
+    <p>Read in order. Parts I&ndash;II are self-contained and assume only first-year thermodynamics and calculus. Each <em>Lecture</em> ends where the next begins, and complexity is introduced one mechanism at a time &mdash; never two at once. Equations are numbered <span class="mono" style="font-size:.85em">(lecture.item)</span> for cross-reference. Boxes flag <strong>definitions</strong>, <strong>key ideas</strong>, <strong>pitfalls</strong>, and <strong>where the idea lives in the code</strong>. An interactive sandbox in Lecture&nbsp;4 lets you watch a tank fill before any real-fluid machinery appears.</p>
+  </div>
+
+  <div class="box code-note">
+    <span class="lab">The three companion models</span>
+    <p><strong>Model&nbsp;A &mdash; <code class="inl">single_cylinder_hem.py</code></strong> (CoolProp): one phase-changing cylinder with homogeneous-equilibrium flashing valves and backflow. <em>Introduced in Lecture&nbsp;10.</em></p>
+    <p><strong>Model&nbsp;B &mdash; <code class="inl">single_cylinder_cantera.py</code></strong> (Cantera): the same architecture, generalised to reacting gas <em>or</em> two-phase fluid, with spark, autoignition and operator-split chemistry. <em>Introduced in Lecture&nbsp;11.</em></p>
+    <p><strong>Model&nbsp;C &mdash; <code class="inl">single_cylinder_two_pipes.py</code></strong> (Cantera): three coupled control volumes &mdash; intake manifold, cylinder, exhaust manifold &mdash; with dual valves, a throttle, and scavenging. <em>Introduced in Lecture&nbsp;12.</em></p>
+  </div>
+</header>
+<h3 id="part1"><span class="partkicker">Part I</span><br>Foundations of numerical modelling</h3>
+
+<h4 id="l1"><span class="lec">L1</span>What a numerical model is &mdash; and what it is not</h4>
+
+<p>Before we model a tank, we should be honest about what the word <em>model</em> means. Every engineering model is a deliberate simplification: a set of equations chosen to capture the behaviour we care about and to ignore everything else. A <em>numerical</em> model is one we cannot (or choose not to) solve with pencil and paper, so we hand the equations to a computer that advances them in small steps.</p>
+
+<div class="box def">
+  <span class="lab">Definition</span>
+  <p>A <strong>numerical model</strong> is a finite, computable approximation of a continuous physical system: a set of governing equations together with a numerical method that produces approximate values of the system&rsquo;s state at a discrete sequence of points (in time, in space, or both).</p>
+</div>
+
+<p>Two decisions define any model: <strong>what you resolve</strong> and <strong>what you assume uniform</strong>. This is the modelling spectrum.</p>
+
+<ul>
+  <li><strong>Distributed models</strong> resolve spatial gradients. The governing equations are partial differential equations (PDEs); the unknowns are <em>fields</em> &mdash; pressure, velocity, and temperature at every point. Computational fluid dynamics (CFD) lives here. It is faithful but expensive, and often far more detail than a system-level question requires.</li>
+  <li><strong>Lumped models</strong> assume each region is spatially uniform and track only its <em>average</em> state. Gradients within a region are not resolved &mdash; they are summarised by transfer laws at the region&rsquo;s boundaries. The governing equations collapse from PDEs to <strong>ordinary differential equations</strong> (ODEs) in time alone.</li>
+</ul>
+
+<p>Filling and emptying models are firmly lumped. A cylinder, a tank, a manifold &mdash; each becomes a single point in a small state space, and the entire simulation reduces to an <em>initial value problem</em>:</p>
+
+<div class="eq"><div class="body">$$ \frac{d\mathbf{y}}{dt} = \mathbf{f}\big(\mathbf{y},\,t\big), \qquad \mathbf{y}(t_0)=\mathbf{y}_0 $$</div><div class="eqn">(1.1)</div></div>
+
+<p>Here \(\mathbf{y}\) is the <em>state vector</em> &mdash; the minimal set of numbers that, together with the geometry and the boundary conditions, fully determines the system at an instant. The function \(\mathbf{f}\) encodes the physics: it says how fast the state is changing right now. Almost all of the intellectual work in this course is building \(\mathbf{f}\) correctly. Advancing (1.1) in time is, by comparison, a solved problem &mdash; the subject of Lecture&nbsp;3.</p>
+
+<h5>Three kinds of error &mdash; keep them separate</h5>
+<p>A number that comes out of a simulation can be wrong for three independent reasons, and good engineers diagnose them separately:</p>
+<ul>
+  <li><strong>Model error</strong> &mdash; the equations themselves are an imperfect description (you assumed uniform temperature; in reality there was a gradient). No amount of computing power removes it.</li>
+  <li><strong>Discretization error</strong> &mdash; you solved the right equations approximately, because the time step was finite. It shrinks as the step shrinks, in a way set by the method&rsquo;s <em>order</em>.</li>
+  <li><strong>Round-off error</strong> &mdash; the computer stores numbers with finite precision. Usually tiny, but in Lecture&nbsp;8 we will see it sabotage a flow model at exact pressure equality, and we will engineer around it.</li>
+</ul>
+
+<div class="box key">
+  <span class="lab">Verification vs. validation</span>
+  <p><strong>Verification</strong> asks &ldquo;am I solving the equations right?&rdquo; &mdash; a mathematical question, answered with conservation checks, grid/step refinement, and analytic limits. <strong>Validation</strong> asks &ldquo;am I solving the right equations?&rdquo; &mdash; a physical question, answered only by comparison with experiment. A model can be perfectly verified and completely invalid. We return to both in Lecture&nbsp;13.</p>
+</div>
+
+<p>The honest workflow is a loop, not a line: pose the question &rarr; choose the smallest model that could answer it &rarr; derive the equations &rarr; implement and verify &rarr; validate against data &rarr; and only then add complexity, one mechanism at a time. These notes are organised around that last principle. We start with the smallest defensible model and add exactly one new physical effect per lecture.</p>
+
+<h4 id="l2"><span class="lec">L2</span>The lumped control volume</h4>
+
+<p>The control volume is the unit cell of every model in this course. It is simply a region of space, with a chosen boundary, across which we account for the flows of mass and energy. The boundary may be fixed (a rigid tank) or moving (a piston face). What matters is that we <em>commit</em> to a boundary and then apply the conservation laws to whatever is inside it.</p>
+
+<div class="box def">
+  <span class="lab">The lumped (well-mixed) assumption</span>
+  <p>A control volume is treated as <strong>spatially uniform</strong>: a single pressure, a single temperature, a single composition describe its entire contents at each instant. This is valid when internal transport (mixing, conduction, acoustic equilibration) is fast compared with the rate at which the boundaries change the state. It is the assumption that turns a field into a point, and a PDE into an ODE.</p>
+</div>
+
+<p>With that assumption, the contents of the volume are pinned down by remarkably few numbers. We will use the <strong>conserved extensive quantities</strong>:</p>
+
+<div class="eq"><div class="body">$$ m(t)\ \text{— total mass [kg]}, \qquad U(t)\ \text{— total internal energy [J]}, \qquad V(t)\ \text{— volume [m}^3\text{]} $$</div><div class="eqn">(2.1)</div></div>
+
+<p>From these three, every <em>intensive</em> property follows. Density and specific internal energy are immediate,</p>
+
+<div class="eq"><div class="body">$$ \rho = \frac{m}{V}, \qquad u = \frac{U}{m}, $$</div><div class="eqn">(2.2)</div></div>
+
+<p>and the remaining thermodynamic state &mdash; pressure, temperature, enthalpy, entropy, vapour quality &mdash; is recovered from an <strong>equation of state</strong>, which we will write abstractly as a function of the two intensive coordinates \((\rho,u)\):</p>
+
+<div class="eq"><div class="body">$$ p = p(\rho,u),\quad T = T(\rho,u),\quad h = h(\rho,u),\quad x = x(\rho,u). $$</div><div class="eqn">(2.3)</div></div>
+
+<p>For an ideal gas this closure is algebraic and famous: \(p = \rho R T\), \(u = c_v T\), \(h = c_p T\). For steam, refrigerants, or any real fluid it comes from property tables or libraries (Lecture&nbsp;9). The <em>structure</em> of the model does not change with the fluid &mdash; only the function that evaluates (2.3) does. This separation is the single most important architectural idea in the course.</p>
+
+<div class="box key">
+  <span class="lab">Why states \((m,U,V)\) and not \((p,T)\)?</span>
+  <p>Mass and energy are <em>conserved</em>: they obey exact balance laws with clean physical source terms (flows in, flows out, heat, work). Pressure and temperature are not conserved &mdash; they are <em>consequences</em>. If we integrate \(p\) and \(T\) directly we must invent ad-hoc rate equations for them and we quietly violate conservation at every step. If we integrate \(m\), \(U\) (and \(V\)) and recover \(p,T\) from the equation of state, conservation holds <em>by construction</em>, the same code works for liquid, gas, and two-phase, and the awkward behaviour of \(p\) and \(T\) across a phase boundary never touches the integrator. Every companion model carries the state vector \([m,\,U]\) (with \(V\) prescribed) for exactly this reason.</p>
+</div>
+
+<p>The generic balance, valid for any conserved quantity \(\Phi\) inside the volume, reads &ldquo;rate of accumulation = net rate in across the boundary + net rate of generation inside&rdquo;. The next several lectures are nothing more than writing this statement out, in turn, for mass (no generation), energy (heat, work, and convected enthalpy), and &mdash; once we reach chemistry &mdash; chemical species (with reaction as the generation term).</p>
+
+<h4 id="l3"><span class="lec">L3</span>Advancing the state in time</h4>
+
+<p>Granting that we can build \(\mathbf{f}\), how do we march (1.1) forward? A time-integration method estimates \(\mathbf{y}(t+\Delta t)\) from \(\mathbf{y}(t)\) using one or more evaluations of \(\mathbf{f}\). The simplest is the <strong>explicit (forward) Euler</strong> step,</p>
+
+<div class="eq"><div class="body">$$ \mathbf{y}_{n+1} = \mathbf{y}_n + \Delta t\,\mathbf{f}(\mathbf{y}_n,t_n), $$</div><div class="eqn">(3.1)</div></div>
+
+<p>which simply follows the current slope for one step. It is transparent and we use it in the Lecture&nbsp;4 sandbox to build intuition. But its error per step scales as \(\Delta t^2\) and it is easily driven unstable, so production models use something better.</p>
+
+<p>The workhorse is the classical <strong>fourth-order Runge&ndash;Kutta</strong> (RK4) method, which samples the slope four times across the step and combines them so that errors through third order cancel:</p>
+
+<div class="eq"><div class="body">$$ \begin{aligned}
+\mathbf{k}_1 &= \mathbf{f}(\mathbf{y}_n,\,t_n), &
+\mathbf{k}_2 &= \mathbf{f}\!\left(\mathbf{y}_n+\tfrac{\Delta t}{2}\mathbf{k}_1,\ t_n+\tfrac{\Delta t}{2}\right),\\[2pt]
+\mathbf{k}_3 &= \mathbf{f}\!\left(\mathbf{y}_n+\tfrac{\Delta t}{2}\mathbf{k}_2,\ t_n+\tfrac{\Delta t}{2}\right), &
+\mathbf{k}_4 &= \mathbf{f}\!\left(\mathbf{y}_n+\Delta t\,\mathbf{k}_3,\ t_n+\Delta t\right),
+\end{aligned} $$</div><div class="eqn">(3.2)</div></div>
+<div class="eq"><div class="body">$$ \mathbf{y}_{n+1} = \mathbf{y}_n + \frac{\Delta t}{6}\big(\mathbf{k}_1 + 2\mathbf{k}_2 + 2\mathbf{k}_3 + \mathbf{k}_4\big). $$</div><div class="eqn">(3.3)</div></div>
+
+<p>All three companion models use exactly this fixed-step RK4, advancing in <em>crank angle</em> rather than time (the two differ only by the constant engine speed \(\omega\), since \(dt = d\theta/\omega\)). Two ideas govern whether the march succeeds.</p>
+
+<h5>Accuracy: local order and global order</h5>
+<p>The <em>local truncation error</em> is what one step introduces; the <em>global error</em> accumulates over a fixed interval. A method of order \(p\) has global error \(\mathcal{O}(\Delta t^{p})\): Euler is first order, RK4 is fourth. Halving the step cuts Euler&rsquo;s error in half but RK4&rsquo;s by sixteen &mdash; which is why RK4 reaches engineering accuracy at step sizes where Euler is hopeless. The practical verification test is <em>step refinement</em>: halve \(\Delta t\); if the answer barely moves, discretization error is under control.</p>
+
+<h5>Stability and stiffness</h5>
+<p>Even an accurate method can blow up if the step is too large for the fastest dynamics present. An explicit method is only <em>stable</em> when \(\Delta t\) is smaller than the shortest physical time scale in \(\mathbf{f}\). When a system contains time scales separated by many orders of magnitude &mdash; say, millisecond gas exchange alongside microsecond combustion chemistry &mdash; it is called <strong>stiff</strong>, and forcing an explicit method to take microsecond steps for the whole simulation is ruinous.</p>
+
+<div class="box key">
+  <span class="lab">A preview of the central numerical tensions</span>
+  <p>Three difficulties will recur, and each gets a deliberate treatment later: <strong>(i)</strong> the equation of state must be evaluated robustly even on the saturation boundary (Lecture&nbsp;9); <strong>(ii)</strong> chemistry is stiff and cannot share the transport step &mdash; we split it off (Lecture&nbsp;11); and <strong>(iii)</strong> the flow laws contain a square root of a pressure difference that misbehaves at equality &mdash; we guarantee a positive argument (Lecture&nbsp;8). Hold these in mind; the foundations are now in place to build the model itself.</p>
+</div>
+<h3 id="part2"><span class="partkicker">Part II</span><br>The filling &amp; emptying model</h3>
+
+<h4 id="l4"><span class="lec">L4</span>One chamber: the mass and energy balances</h4>
+
+<p>We now write \(\mathbf{f}\) for a single control volume connected to one or more reservoirs. Start with mass. With the sign convention that inflow is positive, the rate of change of the contents is the algebraic sum over all ports:</p>
+
+<div class="eq"><div class="body">$$ \frac{dm}{dt} = \sum_{k} \dot m_k, \qquad \dot m_k > 0 \ \text{(into CV)},\quad \dot m_k < 0 \ \text{(out of CV)}. $$</div><div class="eqn">(4.1)</div></div>
+
+<p>For the textbook case of one inlet and one outlet this is just \(\dot m = \dot m_{\text{in}} - \dot m_{\text{out}}\). The single signed sum (4.1) is more general and is what we implement: it handles filling, emptying, and &mdash; crucially &mdash; <em>backflow</em>, where a port that is nominally an inlet temporarily reverses. We will not need a separate equation for any of these cases.</p>
+
+<p>Energy is the heart of the model. The unsteady first law for an open, possibly moving control volume states that the stored internal energy changes through heat transfer, work, moving-boundary work, and the enthalpy carried by mass crossing the boundary:</p>
+
+<div class="eq"><div class="body">$$ \frac{dU}{dt} = \dot Q_{\text{CV}} \;+\; \dot W_{\text{on}} \;-\; p_{\text{CV}}\frac{dV}{dt} \;+\; \sum_{k}\dot H_{k}. $$</div><div class="eqn">(4.2)</div></div>
+
+<p>Here \(U=mu\) is the internal energy inside the boundary, \(\dot Q_{\text{CV}}\) is heat into the volume, \(\dot W_{\text{on}}\) is any shaft/electrical work done on the fluid, and \(-p\,dV/dt\) is the moving-boundary (piston) work &mdash; deferred to Lecture&nbsp;5, where it does the useful work of an engine. The convective terms \(\dot H_k\) carry energy with flowing mass and deserve care.</p>
+
+<div class="box key">
+  <span class="lab">Upwinding: the convected enthalpy follows the flow</span>
+  <p>A flowing stream carries <em>enthalpy</em> (not internal energy) because it does flow work pushing into or out of the volume. The enthalpy it carries is that of the <strong>donor</strong> &mdash; the upstream side. On <em>inflow</em>, the stream arrives with the reservoir&rsquo;s enthalpy; on <em>outflow</em>, it leaves carrying the control volume&rsquo;s own enthalpy:</p>
+</div>
+
+<div class="eq"><div class="body">$$ \dot H_{k} = \begin{cases} \dot m_k\, h_{\text{in},k}, & \dot m_k > 0 \quad(\text{donor = reservoir})\\[3pt] \dot m_k\, h_{\text{CV}}, & \dot m_k < 0 \quad(\text{donor = CV}). \end{cases} $$</div><div class="eqn">(4.3)</div></div>
+
+<p>This single <em>upwinded</em> rule is what makes a port automatically symmetric to flow reversal: the same code computes the right energy term whether the port is filling or emptying, because the choice of donor is re-made each evaluation from the instantaneous pressures. Every companion model implements (4.3) in one line of its derivative routine; we will see it shortly.</p>
+
+<p>Collecting terms, the complete ODE system for a single chamber is</p>
+
+<div class="eq"><div class="body">$$ \boxed{\;\frac{dm}{dt} = \sum_k \dot m_k, \qquad \frac{dU}{dt} = \dot Q_{\text{CV}} + \dot W_{\text{on}} - p_{\text{CV}}\frac{dV}{dt} + \sum_k \dot H_k\;} $$</div><div class="eqn">(4.4)</div></div>
+
+<p>closed at each step by \(\rho=m/V\), \(u=U/m\), and the equation of state (2.3). That is the entire filling/emptying model. Everything that follows &mdash; pistons, real fluids, choked valves, combustion, manifolds &mdash; is a more elaborate way of evaluating the four terms on the right-hand side of (4.4).</p>
+
+<h5>Filling, emptying, and a result worth remembering</h5>
+<p>Consider the simplest non-trivial case: a <em>rigid</em> (\(dV/dt=0\)), <em>adiabatic</em> (\(\dot Q=0\)) tank with no shaft work, filled from a reservoir. Then (4.4) collapses to \(\dot U = \dot m_{\text{in}}h_{\text{in}}\). Because the incoming stream delivers <em>enthalpy</em> but the tank stores <em>internal energy</em>, the difference \(h-u = p/\rho\) is deposited as extra thermal energy: an initially empty adiabatic tank filled with an ideal gas reaches a final temperature of \(\gamma\,T_{\text{reservoir}}\) &mdash; up to 40&nbsp;% hotter than the gas supplying it. This counter-intuitive heating is a direct, testable consequence of the convected-enthalpy term, and it is the first thing you should verify in any new implementation. The sandbox below lets you watch it happen.</p>
+
+<div class="demo reveal">
+  <h5>Sandbox — filling a rigid, adiabatic tank (ideal gas)</h5>
+  <p class="demo-sub">A 1&nbsp;litre tank, initially at 1&nbsp;bar and 300&nbsp;K, is filled with air through an orifice from a 300&nbsp;K reservoir. States \([m,\,U]\) are advanced by explicit Euler; \(p\) and \(T\) are recovered from the ideal-gas law each step. Watch the tank pressure climb toward the supply and the temperature overshoot well past 300&nbsp;K.</p>
+  <div class="demo-grid">
+    <div>
+      <canvas id="fillCanvas" width="720" height="430" aria-label="Live plot of tank pressure and temperature during filling"></canvas>
+    </div>
+    <div class="controls">
+      <label>Reservoir pressure <span class="val"><span id="vPs">5.0</span> bar</span>
+        <input type="range" id="ps" min="2" max="10" step="0.1" value="5"></label>
+      <label>Orifice area <span class="val"><span id="vA">8.0</span> mm²</span>
+        <input type="range" id="area" min="1" max="30" step="0.5" value="8"></label>
+      <label>Discharge coeff. C<sub>d</sub> <span class="val"><span id="vCd">0.80</span></span>
+        <input type="range" id="cd" min="0.4" max="1.0" step="0.01" value="0.8"></label>
+      <div class="btnrow">
+        <button id="run">▶ Run</button>
+        <button id="reset" class="ghost">Reset</button>
+      </div>
+      <div class="readout" id="readout">press Run to start</div>
+    </div>
+  </div>
+  <p class="fig-cap"><b>Fig. 4.1 — Interactive filling model.</b> Teal: tank pressure approaching the supply pressure. Amber: tank temperature, overshooting 300&nbsp;K toward \(\gamma T_s\). When the orifice is choked (tank pressure below ~0.53&times;supply) the inflow is independent of tank pressure; the readout flags the transition to subcritical flow.</p>
+</div>
+
+<div class="box code-note">
+  <span class="lab">In the code · the derivative routine</span>
+  <p>In Model&nbsp;A the entire system (4.4) is the method <code class="inl">SingleCylinderEngine.deriv</code>. Its core is a near-verbatim transcription of the boxed equations &mdash; the flash for closure, the two valve calls returning signed flow and upwinded enthalpy, then the mass and energy sums:</p>
+</div>
+
+<pre><div class="codebar"><span>single_cylinder_hem.py</span><span class="tag">excerpt · deriv</span></div><code class="language-python">def deriv(self, theta_deg, m, U):
+    V  = self.cyl.V(theta_deg)
+    st = self.cv_fluid.flash_du(m / V, U / m)        # (rho,u) -> p,T,h,x  [Eq 2.2-2.3]
+
+    Qw   = (self.cyl.h_woschni(st["p"], st["T"])
+            * self.cyl.A_wall(theta_deg) * (self.cyl.T_wall - st["T"]))   # Q_CV  [L7]
+    dVdt = self.cyl.dVdtheta(theta_deg) * self.cyl.omega                  # dV/dt [L5]
+
+    md_in, h_in = self.intake.mass_flow(theta_deg, st, self.supply.state)      # signed, upwinded
+    md_ex, h_ex = self.exhaust.mass_flow(theta_deg, st, self.exhaust_res.state)
+
+    dm = md_in + md_ex                                          # Eq 4.1
+    dU = Qw - st["p"] * dVdt + md_in * h_in + md_ex * h_ex      # Eq 4.4
+    return dm, dU, info</code></pre>
+
+<h4 id="l5"><span class="lec">L5</span>Moving boundaries and work</h4>
+
+<p>If the boundary moves, the fluid does work on it. The moving-boundary term \(-p\,dV/dt\) in (4.2) is the bridge between a passive vessel and a working machine: when the volume expands (\(dV/dt>0\)) the fluid loses internal energy doing work on the piston; when it is compressed, it gains. To use this term we need the volume and its rate as functions of the crank position.</p>
+
+<p>For a slider-crank mechanism &mdash; the kinematics of essentially every reciprocating engine and compressor &mdash; the piston displacement from top dead centre is</p>
+
+<div class="eq"><div class="body">$$ s(\theta) = a(1-\cos\theta) + \Big(\ell - \sqrt{\ell^2 - a^2\sin^2\theta}\Big), $$</div><div class="eqn">(5.1)</div></div>
+
+<p>where \(a=S/2\) is the crank radius (half the stroke \(S\)) and \(\ell\) is the connecting-rod length. The instantaneous volume and its derivative with respect to crank angle then follow from the bore area \(A_p\):</p>
+
+<div class="eq"><div class="body">$$ V(\theta) = V_c + A_p\,s(\theta), \qquad \frac{dV}{d\theta} = A_p\,a\sin\theta\left(1 + \frac{a\cos\theta}{\sqrt{\ell^2 - a^2\sin^2\theta}}\right), $$</div><div class="eqn">(5.2)</div></div>
+
+<p>with \(V_c\) the clearance volume at top dead centre, fixed by the compression ratio \(r_c\) through \(V_c = V_d/(r_c-1)\) and the displacement \(V_d = A_p S\). Because the integrator advances in crank angle, the rate the energy equation needs is \(dV/dt = (dV/d\theta)\,\omega\). The figure shows the geometry; equation (5.2) is exactly what the companion models evaluate.</p>
+
+<div class="figure reveal">
+  <svg viewBox="0 0 900 392" role="img" aria-label="Slider-crank geometry">
+    <defs>
+      <marker id="omg51" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto">
+        <path d="M1,1 L8,5 L1,9" fill="none" stroke="#B86A12" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <style>.lb{font-family:'Space Grotesk',sans-serif;} .mn{font-family:'JetBrains Mono',monospace;}</style>
+
+    <!-- line of stroke (bore-axis centreline) -->
+    <line x1="450" y1="40" x2="450" y2="372" stroke="#D7DEE4" stroke-width="1" stroke-dasharray="2 5"/>
+
+    <!-- TDC / piston-face datum lines -->
+    <line x1="150" y1="44" x2="660" y2="44" stroke="#D7DEE4" stroke-width="1" stroke-dasharray="3 5"/>
+    <text class="lb" x="672" y="48" font-size="12" fill="#5C6E7C">TDC (θ=0)</text>
+    <line x1="150" y1="120" x2="660" y2="120" stroke="#D7DEE4" stroke-width="1" stroke-dasharray="3 5"/>
+    <text class="lb" x="672" y="124" font-size="12" fill="#5C6E7C">piston face</text>
+
+    <!-- cylinder -->
+    <rect x="375" y="40" width="150" height="170" fill="#FFFFFF" stroke="#16202B" stroke-width="2.5"/>
+    <text class="lb" x="450" y="32" text-anchor="middle" font-size="13" fill="#5C6E7C">bore B, area A_p</text>
+    <!-- gas region -->
+    <rect x="379" y="44" width="142" height="76" fill="#E3EEF0"/>
+
+    <!-- clearance bracket -->
+    <line x1="537" y1="44" x2="537" y2="120" stroke="#B86A12" stroke-width="1.5"/>
+    <line x1="532" y1="44" x2="542" y2="44" stroke="#B86A12" stroke-width="1.5"/>
+    <line x1="532" y1="120" x2="542" y2="120" stroke="#B86A12" stroke-width="1.5"/>
+    <text class="mn" x="548" y="86" font-size="11" fill="#B86A12">V_c + A_p·s</text>
+
+    <!-- connecting rod: descends beneath the piston to the crank -->
+    <line x1="450" y1="131" x2="475" y2="279" stroke="#0E6B79" stroke-width="4"/>
+
+    <!-- piston drawn over the rod so the small end seats inside it -->
+    <rect x="379" y="120" width="142" height="22" rx="3" fill="#33424F"/>
+    <circle cx="450" cy="131" r="4" fill="#0E6B79"/>
+    <text class="mn" x="450" y="88" text-anchor="middle" font-size="13" fill="#0A4E59">V(θ)</text>
+    <text class="mn" x="486" y="242" font-size="12" fill="#0E6B79">ℓ (conrod)</text>
+
+    <!-- crank -->
+    <circle cx="450" cy="318" r="46" fill="none" stroke="#D7DEE4" stroke-width="2" stroke-dasharray="4 4"/>
+    <line x1="450" y1="318" x2="475" y2="279" stroke="#16202B" stroke-width="4"/>
+    <circle cx="450" cy="318" r="5" fill="#16202B"/>
+    <circle cx="475" cy="279" r="5" fill="#0E6B79"/>
+    <!-- crank angle theta, measured from the line of stroke -->
+    <path d="M450,292 A26,26 0 0 1 464,296" fill="none" stroke="#16202B" stroke-width="1.5"/>
+    <text class="mn" x="457" y="287" font-size="12" fill="#16202B">θ</text>
+    <text class="mn" x="398" y="344" font-size="12" fill="#16202B">a = S/2</text>
+    <!-- rotation sense -->
+    <path d="M404,318 A46,46 0 0 1 450,272" fill="none" stroke="#B86A12" stroke-width="2" marker-end="url(#omg51)"/>
+    <text class="mn" x="396" y="296" font-size="13" fill="#B86A12">ω</text>
+  </svg>
+  <p class="fig-cap"><b>Fig. 5.1 — Slider-crank kinematics.</b> The crank angle \(\theta\) maps to a volume \(V(\theta)\) through (5.1)&ndash;(5.2). The same routine supplies the wall area \(A_{\text{wall}}(\theta)=2A_p+\pi B\,s(\theta)\) used by the heat-transfer model of Lecture&nbsp;7.</p>
+</div>
+
+<div class="box code-note">
+  <span class="lab">In the code · geometry shared by all three models</span>
+  <p>The <code class="inl">Cylinder</code> class encapsulates (5.1)&ndash;(5.2). Model&nbsp;B and Model&nbsp;C import it unchanged &mdash; the geometry is orthogonal to the fluid and the network, which is precisely the modular payoff of separating the state equations from their closure.</p>
+</div>
+
+<pre><div class="codebar"><span>single_cylinder_hem.py</span><span class="tag">excerpt · Cylinder</span></div><code class="language-python">def _s(self, th):                                   # piston travel from TDC, Eq 5.1
+    return self.a + self.l - (self.a * np.cos(th)
+                              + np.sqrt(self.l**2 - (self.a * np.sin(th))**2))
+
+def V(self, theta_deg):                             # Eq 5.2 (left)
+    return self.Vc + self.Ap * self._s(np.deg2rad(theta_deg))
+
+def dVdtheta(self, theta_deg):                      # Eq 5.2 (right), per radian
+    th   = np.deg2rad(theta_deg)
+    root = np.sqrt(self.l**2 - (self.a * np.sin(th))**2)
+    ds   = self.a * np.sin(th) * (1.0 + self.a * np.cos(th) / root)
+    return self.Ap * ds</code></pre>
+<h4 id="l6"><span class="lec">L6</span>Resistive elements: orifices, valves, and the flow law</h4>
+
+<p>The reservoirs and the control volume are connected by <strong>resistive elements</strong> &mdash; valves, orifices, pipes, restrictions. A resistance does not store mass or energy; it converts a pressure difference into a mass flow. Choosing what counts as &ldquo;resistance&rdquo; and what counts as &ldquo;control volume&rdquo; is the modeller&rsquo;s decision, and the cleanest choice for lumped models is <strong>tank-only</strong> control volumes with the resistances sitting on the boundary: their pressure drop sets \(\dot m\), and their heat loss merely modifies the enthalpy delivered across the boundary.</p>
+
+<p>A generic hydraulic/pneumatic resistance relates pressure drop to a dynamic head through a loss coefficient \(K\). With \(v=\dot m/(\rho A)\),</p>
+
+<div class="eq"><div class="body">$$ \Delta p_{\text{loss}} = K\,\frac{\rho v^2}{2} = \frac{K}{2\rho A^2}\,\dot m\,|\dot m|, \qquad K = f\frac{L}{D} + \sum K_{\text{minor}}, $$</div><div class="eqn">(6.1)</div></div>
+
+<p>where the product \(\dot m\,|\dot m|\) carries the sign so the same expression describes forward flow and backflow. Inverting for the orifice case &mdash; where acceleration through the restriction dominates &mdash; gives the form you will recognise from any fluid-mechanics text:</p>
+
+<div class="eq"><div class="body">$$ \dot m = C_d A\,\sqrt{2\,\rho_{\text{up}}\,|\Delta p|}\;\operatorname{sgn}(\Delta p), \qquad \Delta p = p_{\text{up}} - p_{\text{down}}. $$</div><div class="eqn">(6.2)</div></div>
+
+<p>The discharge coefficient \(C_d\) lumps the vena-contracta and viscous losses; \(\rho_{\text{up}}\) is the density on the high-pressure (donor) side. Equation (6.2) is the <em>incompressible</em> orifice; for a gas with a large pressure ratio it must be replaced by a compressible, possibly <em>choked</em>, model (Lecture&nbsp;10). The structural points, however, are already visible here.</p>
+
+<div class="box key">
+  <span class="lab">Sign convention and backflow are one mechanism</span>
+  <p>The donor (upstream) side is re-selected every evaluation from the instantaneous pressures. Whichever reservoir/CV is at higher pressure feeds the restriction; its density and enthalpy are used; the sign of \(\dot m\) records the direction. There is no special &ldquo;reverse-flow&rdquo; branch &mdash; reversal is just a relabelling of which side is the donor. This is why a steam expander whose exhaust valve opens slightly <em>below</em> header pressure can suck process steam back into the cylinder for part of the stroke and the model handles it without a single extra line.</p>
+</div>
+
+<p>Real valves do not snap open. A physical lift profile opens and closes smoothly, and a discontinuous area would inject high-frequency transients that wreck a fixed-step integrator. The companion models therefore schedule the effective area with a \(\sin^2\) ramp that is exactly zero at opening and closing and smoothly unity in between, wrapped so a window may cross the cycle boundary:</p>
+
+<pre><div class="codebar"><span>single_cylinder_hem.py</span><span class="tag">excerpt · valve lift &amp; donor</span></div><code class="language-python">def area(self, theta_deg):
+    span = (self.close_deg - self.open_deg) % 360.0
+    loc  = (theta_deg - self.open_deg) % 360.0
+    if loc &gt;= span:
+        return 0.0
+    r = min(self.ramp_deg, 0.5 * span)
+    if loc &lt; r:                                          # smooth opening ramp
+        f = np.sin(0.5 * np.pi * loc / r) ** 2
+    elif loc &gt; span - r:                                 # smooth closing ramp
+        f = np.sin(0.5 * np.pi * (span - loc) / r) ** 2
+    else:
+        f = 1.0
+    return self.A_max * f
+
+def mass_flow(self, theta_deg, cyl_state, res_state):
+    A_eff = self.Cd * self.area(theta_deg)
+    if A_eff &lt;= 0.0:
+        return 0.0, cyl_state["h"]
+    # donor upwinding: the higher-pressure side feeds the nozzle  [Eq 6.2]
+    if res_state["p"] &gt;= cyl_state["p"]:
+        up, dn, sign = res_state, cyl_state, +1.0
+    else:
+        up, dn, sign = cyl_state, res_state, -1.0
+    ...
+    h_tilde = h_delivered if sign &gt; 0 else cyl_state["h"]   # upwinded enthalpy [Eq 4.3]
+    return sign * mdot, h_tilde</code></pre>
+
+<h4 id="l7"><span class="lec">L7</span>Heat transfer &mdash; in the volume and in the resistance</h4>
+
+<p>Two distinct heat-transfer interactions appear, and conflating them is a common error. The first is between the control-volume contents and its walls; the second is heat lost by fluid <em>while it passes through a resistance</em>.</p>
+
+<p><strong>Wall heat transfer.</strong> The convective exchange with the wall is the Newton-cooling form</p>
+
+<div class="eq"><div class="body">$$ \dot Q_{\text{CV}} = h_c\,A_{\text{wall}}(\theta)\,\big(T_{\text{wall}} - T_{\text{CV}}\big), $$</div><div class="eqn">(7.1)</div></div>
+
+<p>with the wetted area itself a function of crank angle, \(A_{\text{wall}}(\theta)=2A_p+\pi B\,s(\theta)\). For in-cylinder gases the convective coefficient \(h_c\) is supplied by an empirical correlation. The companion models use the <strong>Woschni</strong> correlation, in which the characteristic gas velocity scales with mean piston speed \(c_m\):</p>
+
+<div class="eq"><div class="body">$$ h_c = 3.26\,B^{-0.2}\,p^{\,0.8}\,T^{-0.55}\,w^{\,0.8}, \qquad w = 2.28\,c_m \;\;[\text{p in kPa, SI elsewhere}]. $$</div><div class="eqn">(7.2)</div></div>
+
+<p>Correlations like (7.2) are <em>model error</em> made explicit &mdash; they are calibrated fits, not first principles, and swapping correlations is a legitimate way to bound the uncertainty they introduce.</p>
+
+<p><strong>Resistance heat loss.</strong> A pipe or valve can cool (or heat) the fluid before it reaches the chamber. Within the resistance, neglecting storage and shaft work, the steady-flow energy balance says the stream&rsquo;s enthalpy changes by the heat added per unit mass:</p>
+
+<div class="eq"><div class="body">$$ h_{0,\text{delivered}} = h_{\text{up}} - \frac{\dot Q_{\text{loss},R}}{|\dot m|}, \qquad \dot Q_{\text{loss},R} = UA_R\,(T_{\text{up}} - T_{\text{wall},R}). $$</div><div class="eqn">(7.3)</div></div>
+
+<div class="box warn">
+  <span class="lab">Pitfall · whose energy budget?</span>
+  <p>An <em>inlet</em> resistance&rsquo;s heat loss changes the enthalpy <strong>entering</strong> the control volume &mdash; it belongs in \(\dot H_{\text{in}}\). An <em>outlet</em> resistance&rsquo;s heat loss happens <em>after</em> the mass has left the chosen boundary; it changes the downstream delivered state but <strong>does not</strong> appear in the control-volume energy equation at all. Getting this attribution wrong silently breaks the energy balance. Note also the \(1/|\dot m|\) in (7.3): as flow vanishes it blows up, so the implementation clips it &mdash; foreshadowing Lecture&nbsp;8.</p>
+</div>
+
+<pre><div class="codebar"><span>single_cylinder_hem.py</span><span class="tag">excerpt · wall &amp; port heat</span></div><code class="language-python">def h_woschni(self, p, T):                       # Eq 7.2
+    w = 2.28 * self.c_m                          # char. velocity ~ mean piston speed
+    return 3.26 * self.B**-0.2 * (p/1000.0)**0.8 * T**-0.55 * w**0.8
+
+# ... inside HEMValve.mass_flow: port heat loss reduces delivered enthalpy [Eq 7.3]
+if self.UA_port &gt; 0.0 and mdot &gt; 0.0:
+    q = self.UA_port * (up["T"] - self.T_wall_port)        # +ve: fluid hotter than wall
+    dh_loss = np.clip(q / max(mdot, 1e-6), -2.0e5, 2.0e5)  # cap to survive tiny mdot
+h_delivered = up["h"] - dh_loss</code></pre>
+
+<h4 id="l8"><span class="lec">L8</span>Numerical robustness: the always-positive pressure loss</h4>
+
+<p>The flow law (6.2) &mdash; and its compressible successor &mdash; contains \(\sqrt{|\Delta p|}\) and selects a donor by comparing two pressures. Both operations are fragile at the precise moment the two pressures are <em>equal</em>: at start-up, at the instant of flow reversal, or whenever a valve opens onto a matched receiver. A naive implementation hits a square root of a (possibly slightly negative, due to round-off) number, or an inverted search bracket, and produces a <code class="inl">NaN</code> that poisons the entire integration.</p>
+
+<p>The user-imposed rule that cures this is simple to state: <strong>there is always a strictly positive pressure loss across an orifice.</strong> The effective downstream pressure the flow solver sees is forced to lie just below the upstream pressure:</p>
+
+<div class="eq"><div class="body">$$ p_{\text{down,eff}} = \min\!\big(\,p_{\text{up}} - \epsilon(p_{\text{up}}),\ p_{\text{down}}\,\big). $$</div><div class="eqn">(8.1)</div></div>
+
+<div class="box warn">
+  <span class="lab">Pitfall · a fixed tiny constant does not work at engineering pressures</span>
+  <p>You cannot subtract a fixed small number such as machine epsilon (\(2.22\times10^{-16}\)) from a pressure of order \(10^5\)&nbsp;Pa: floating-point numbers near \(10^5\) are spaced about \(10^{-11}\)&nbsp;Pa apart, so the subtraction is rounded straight back to \(10^5\) and nothing changes. The correct \(\epsilon\) is <strong>one unit in the last place</strong> (one ULP) <em>at the magnitude of</em> \(p_{\text{up}}\) &mdash; the smallest decrement the representation can actually register. In NumPy that is <code class="inl">np.nextafter(p_in, -np.inf)</code> (the exact analogue of MATLAB&rsquo;s <code class="inl">p_in - eps(p_in)</code>).</p>
+</div>
+
+<pre><div class="codebar"><span>single_cylinder_hem.py</span><span class="tag">excerpt · the stabilisation rule</span></div><code class="language-python">def stabilized_outlet_pressure(p_in, p_out):
+    """Largest representable pressure strictly below p_in, capped by the
+    actual downstream pressure of the current iteration."""
+    return min(np.nextafter(p_in, -np.inf), p_out)</code></pre>
+
+<p>With (8.1) in force, the flow-solver search interval \([\,p_{\text{down,eff}},\,p_{\text{up}}\,]\) can never invert and the argument of every square root is non-negative &mdash; even at exact pressure equality. The cost is a vanishingly small, physically harmless flow at matched conditions; the benefit is an integration that never sees a <code class="inl">NaN</code>. The same idea recurs as gentle <em>floors</em> on the conserved states (a minimum mass and energy, so \(\rho=m/V\) and \(u=U/m\) stay finite) and as the \(\max(\dot m,\,\dot m_{\min})\) guard already seen in the port-heat term (7.3).</p>
+
+<div class="box key">
+  <span class="lab">The robustness mindset</span>
+  <p>Physical models contain operations that are exact in real arithmetic but singular in floating point at measure-zero events &mdash; equality, emptiness, zero flow. A robust implementation identifies each such event in advance and replaces the singular operation with one that is continuous through it. This is not a hack; it is the discrete counterpart of the well-posedness we demand of the continuous equations.</p>
+</div>
+<h3 id="part3"><span class="partkicker">Part III</span><br>Real fluids and phase change</h3>
+
+<h4 id="l9"><span class="lec">L9</span>Property models and the flash</h4>
+
+<p>The ideal-gas closure of Lecture&nbsp;2 served the sandbox, but steam, refrigerants, and the working fluids of real machines condense, boil, and behave nothing like \(pV=mRT\). The architectural promise made earlier now pays off: <em>only the equation-of-state function changes.</em> We replace the algebraic ideal-gas relations with calls to a property library &mdash; CoolProp, REFPROP, the IAPWS steam formulation, or Cantera&rsquo;s pure-fluid backend &mdash; and the rest of the model is untouched.</p>
+
+<p>The operation we need is a <strong>flash</strong>: from the two intensive coordinates we already carry, \((\rho,u)\), return the full thermodynamic state.</p>
+
+<div class="eq"><div class="body">$$ (\rho,\,u)\ \longrightarrow\ \big\{\,p,\ T,\ h,\ s,\ x\,\big\}. $$</div><div class="eqn">(9.1)</div></div>
+
+<p>Inside the two-phase dome the state is a saturated mixture of liquid and vapour in equilibrium, parameterised by the vapour quality \(x\). Specific volume and internal energy are mass-weighted blends of the saturated-liquid (\(f\)) and saturated-vapour (\(g\)) endpoints,</p>
+
+<div class="eq"><div class="body">$$ v = (1-x)v_f + x\,v_g, \qquad u = (1-x)u_f + x\,u_g, \qquad \rho = \frac{1}{v}, $$</div><div class="eqn">(9.2)</div></div>
+
+<p>so that the quality is recoverable from either conserved coordinate, e.g. \(x = (u-u_f)/(u_g-u_f)\), with \(x<0\) meaning subcooled liquid and \(x>1\) meaning superheated vapour. The library performs this inversion for us, choosing the saturation pressure that makes (9.2) consistent.</p>
+
+<div class="box key">
+  <span class="lab">Why \((\rho,u)\) is the right coordinate for phase change</span>
+  <p>During boiling or condensation, pressure and temperature are <em>locked together</em> on the saturation line and barely move while quality sweeps from 0 to 1. A state vector built on \(p\) or \(T\) is therefore nearly singular across the dome &mdash; a huge change in the contents produces almost no change in the integrated variable, and the inverse map is ill-conditioned. The conserved coordinates \(\rho\) and \(u\), by contrast, vary monotonically straight through the dome. Integrating \((m,U)\) and flashing to \((p,T)\) is not merely tidy; near phase change it is the difference between a stable simulation and a divergent one.</p>
+</div>
+
+<p>Two practical points. First, the library returns a <em>phase label</em> alongside the numbers, which we keep for diagnostics (the cylinder may report &ldquo;liquid&rdquo;, &ldquo;two-phase&rdquo;, &ldquo;gas&rdquo;, or &ldquo;supercritical&rdquo; at different crank angles). Second, general-purpose flash routines occasionally stall near the saturation boundary; a robust model carries a <strong>fallback</strong> &mdash; because \(u(T,\rho)\) is monotone in \(T\), a simple bisection on temperature at fixed density always converges and resolves quality directly inside the dome. Model&nbsp;A wraps CoolProp&rsquo;s \((\rho,u)\) flash; Model&nbsp;B&rsquo;s pure-fluid backend adds exactly such a bisection fallback.</p>
+
+<pre><div class="codebar"><span>single_cylinder_hem.py</span><span class="tag">excerpt · CoolProp flash wrapper</span></div><code class="language-python">class Fluid:
+    """Thin wrapper around a CoolProp AbstractState (one per consumer)."""
+    def __init__(self, name="Water", backend="HEOS"):
+        self.AS = AbstractState(backend, name)
+
+    def flash_du(self, rho, u):                       # (rho,u) -> full state   [Eq 9.1]
+        self.AS.update(CP.DmassUmass_INPUTS, rho, u)
+        return self._read()                           # _read(): x = Q() if two-phase else NaN
+
+    def hrho_ps(self, p, s):                          # (h, rho) on the isentrope; HEM throat
+        self.AS.update(CP.PSmass_INPUTS, p, s)
+        return self.AS.hmass(), self.AS.rhomass()</code></pre>
+
+<h4 id="l10"><span class="lec">L10</span>Compressible and flashing flow &mdash; <span style="color:var(--teal)">Model A</span></h4>
+
+<p>The incompressible orifice (6.2) fails for a gas across a large pressure ratio, and fails spectacularly for a saturated or subcooled liquid that <em>flashes</em> &mdash; partially vaporises &mdash; as it accelerates through the restriction and its pressure falls below the local saturation value. The flashing dramatically increases specific volume, chokes the throat, and limits the achievable mass flux. We need a compressible model that captures both choking and flashing in a single, backflow-capable expression. The <strong>homogeneous-equilibrium model</strong> (HEM) is the standard tool.</p>
+
+<div class="box def">
+  <span class="lab">The HEM assumptions</span>
+  <p>Liquid and vapour move at the <strong>same velocity</strong> (slip ratio unity) and remain in <strong>thermodynamic equilibrium</strong> at every point, so at any pressure the mixture properties are the equilibrium saturation values. The two phases are treated as one homogeneous compressible fluid with an equilibrium equation of state.</p>
+</div>
+
+<p>The companion models use the <strong>isentropic-nozzle</strong> form of HEM. The donor&rsquo;s stagnation state \((p_0,h_0)\) fixes an isentrope \(s_0\); for any candidate throat pressure \(p_t\) the equilibrium state on that isentrope gives an enthalpy \(h(p_t,s_0)\) and density \(\rho(p_t,s_0)\), and energy conservation along the nozzle yields the mass flux</p>
+
+<div class="eq"><div class="body">$$ G(p_t) = \rho(p_t,s_0)\,\sqrt{2\big(h_0 - h(p_t,s_0)\big)}\,. $$</div><div class="eqn">(10.1)</div></div>
+
+<p>The delivered flux is the <strong>maximum</strong> of \(G\) over the admissible throat-pressure range, from the (stabilised) downstream pressure up to the stagnation pressure:</p>
+
+<div class="eq"><div class="body">$$ \dot m = C_d A\;\max_{\;p_{\text{down,eff}}\le p_t\le p_0} G(p_t). $$</div><div class="eqn">(10.2)</div></div>
+
+<div class="box key">
+  <span class="lab">Choking falls out of a maximisation &mdash; no separate branch</span>
+  <p>As \(p_t\) is lowered from \(p_0\), \(G\) rises, peaks at the critical throat pressure \(p^\*\), then falls. If the actual downstream pressure lies <em>above</em> \(p^\*\), the maximum over the interval sits at the endpoint \(p_{\text{down}}\): the flow is <strong>subcritical</strong> and the flux is set by the real pressure ratio. If the downstream pressure lies <em>below</em> \(p^\*\), the interval contains the peak, the maximum is \(G(p^\*)\): the flow is <strong>choked</strong> and the flux is capped, independent of how low the downstream pressure goes. One maximisation &mdash; here a few iterations of golden-section search &mdash; returns the correct regime automatically. Compare this with the sandbox of Lecture&nbsp;4, where we hard-coded the choked/subcritical split by hand; the HEM search unifies them.</p>
+</div>
+
+<div class="figure reveal">
+  <svg viewBox="0 0 760 320" role="img" aria-label="HEM mass flux versus throat pressure, showing the choking maximum">
+    <style>.lb{font-family:'Space Grotesk',sans-serif;}.mn{font-family:'JetBrains Mono',monospace;}</style>
+    <!-- axes -->
+    <line x1="90" y1="40" x2="90" y2="260" stroke="#16202B" stroke-width="1.5"/>
+    <line x1="90" y1="260" x2="710" y2="260" stroke="#16202B" stroke-width="1.5"/>
+    <text class="lb" x="60" y="150" font-size="13" fill="#16202B" transform="rotate(-90 60 150)">mass flux G</text>
+    <text class="lb" x="400" y="298" text-anchor="middle" font-size="13" fill="#16202B">throat pressure p_t  →  p₀</text>
+    <!-- G curve: hump, peak at p* -->
+    <path d="M120,255 C 230,150 300,70 360,70 C 430,70 560,150 690,258" fill="none" stroke="#0E6B79" stroke-width="3"/>
+    <!-- p* marker -->
+    <line x1="360" y1="70" x2="360" y2="260" stroke="#A8345F" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <circle cx="360" cy="70" r="5" fill="#A8345F"/>
+    <text class="mn" x="360" y="58" text-anchor="middle" font-size="12" fill="#A8345F">p*  (critical / choke)</text>
+    <!-- choked region -->
+    <rect x="90" y="40" width="270" height="220" fill="#A8345F" opacity="0.05"/>
+    <text class="lb" x="225" y="120" text-anchor="middle" font-size="12" fill="#A8345F">p_down ≤ p* :</text>
+    <text class="lb" x="225" y="138" text-anchor="middle" font-size="12" fill="#A8345F">choked → take peak G(p*)</text>
+    <!-- subcritical region -->
+    <text class="lb" x="540" y="120" text-anchor="middle" font-size="12" fill="#0E6B79">p_down &gt; p* :</text>
+    <text class="lb" x="540" y="138" text-anchor="middle" font-size="12" fill="#0E6B79">subcritical → take endpoint</text>
+    <!-- endpoint dot -->
+    <circle cx="560" cy="151" r="5" fill="#0E6B79"/>
+    <text class="mn" x="560" y="172" text-anchor="middle" font-size="11" fill="#0E6B79">G(p_down)</text>
+  </svg>
+  <p class="fig-cap"><b>Fig. 10.1 — Choking as a maximisation.</b> The HEM flux \(G(p_t)\) of (10.1) peaks at the critical pressure \(p^\*\). Taking the maximum over the admissible interval (10.2) returns the choked value when the receiver is below \(p^\*\) and the subcritical value otherwise &mdash; no explicit regime test is needed.</p>
+</div>
+
+<pre><div class="codebar"><span>single_cylinder_hem.py</span><span class="tag">excerpt · HEM throat search</span></div><code class="language-python">def _G_delivered(self, p_up, p_dn_eff, h0, s0):
+    b = np.nextafter(p_up, -np.inf)        # throat strictly below p0   [Eq 8.1]
+    a = min(p_dn_eff, b)
+    if not (a &lt; b):
+        return 0.0
+    def G(pt):                             # HEM isentropic mass flux    [Eq 10.1]
+        h_t, rho_t = self.fluid.hrho_ps(pt, s0)
+        return rho_t * np.sqrt(max(2.0 * (h0 - h_t), 0.0))
+    _, G_best = _golden_max(G, a, b, self.n_golden)   # max -> choked OR subcritical [Eq 10.2]
+    return G_best</code></pre>
+
+<p>An alternative, equally valid HEM formulation writes a lumped momentum balance across the restriction, \(p_u-p^\*=G^2\big[v^\*-v_u+\tfrac12(K+fL/D)\,\bar v\big]\), and maximises \(G\) the same way; it makes the acceleration, friction, and minor-loss contributions explicit. The isentropic-nozzle form above is what Model&nbsp;A includes.</p>
+
+<div class="box code-note">
+  <span class="lab">Model A in full · <code class="inl">single_cylinder_hem.py</code></span>
+  <p>Assembling Lectures 4&ndash;10 gives the first complete program. A single cylinder carries states \([m,U]\); a CoolProp \((\rho,u)\) flash closes the thermodynamics and lets the contents be <strong>liquid, two-phase, or gas at any instant</strong>; slider-crank kinematics set \(V(\theta)\); Woschni supplies wall heat; and two HEM valves with donor upwinding, choking, port heat loss, and the <code class="inl">nextafter</code> stabilisation handle the flows. Fixed-step RK4 in crank angle integrates it, recording the full state every <code class="inl">output_every</code> iterations (default&nbsp;10).</p>
+  <p><strong>The demo case is chosen to exercise every mechanism:</strong> a wet-steam piston expander with a saturated 10&nbsp;bar supply and a 3&nbsp;bar process-steam receiver at 600&nbsp;rpm. Expansion drives the contents into the two-phase dome (the control volume <em>condenses</em>, crossing the gas/two-phase boundary every revolution), and the exhaust valve opens slightly below header pressure, producing a genuine <em>flow reversal</em> — header steam blows back into the cylinder, then the up-stroke expels it. Run it with:</p>
+</div>
+
+<pre><div class="codebar"><span>shell</span><span class="tag">run Model A</span></div><code class="language-python">pip install CoolProp numpy matplotlib
+python single_cylinder_hem.py          # prints a state table; writes cylinder_states.png</code></pre>
+
+<h3 id="part4" class="reveal"><span class="partkicker">Part IV</span><br>Reacting flows</h3>
+
+<h4 id="l11"><span class="lec">L11</span>Chemistry inside the control volume &mdash; <span style="color:var(--teal)">Model B</span></h4>
+
+<p>So far the contents of the cylinder have been a single substance whose only freedom is to change phase. Model&nbsp;B removes that restriction: the control volume now holds a <strong>mixture of reacting species</strong> &mdash; fuel, oxidiser, and combustion products &mdash; whose composition evolves in time. This is the step from a steam expander to an internal-combustion engine, and it adds exactly one new idea to the bookkeeping and one new idea to the numerics.</p>
+
+<h5>Composition as extra conserved states</h5>
+
+<p>A mixture of \(K\) species is described by the species masses \(m_k\), or equivalently the mass fractions \(Y_k=m_k/m\). Each \(m_k\) obeys its own filling/emptying balance, transported by the same port flows that move total mass &mdash; each port carries the composition of its <em>donor</em>:</p>
+
+<div class="eq"><div class="body">$$ \frac{\mathrm d m_k}{\mathrm d t} \;=\; \sum_{\text{ports}} \dot m_{\text{port}}\; Y_{k,\text{donor}}, \qquad k = 1,\dots,K. $$</div><div class="eqn">(11.1)</div></div>
+
+<p>The donor rule is the upwinding of Lecture&nbsp;6 applied to composition: inflow carries the reservoir&rsquo;s mass fractions, outflow carries the cylinder&rsquo;s. The state vector grows from \([m,U]\) to \([m,U,m_1,\dots,m_K]\), and the flash of Lecture&nbsp;9 now takes composition as a third argument: \((\rho,u,Y)\to\{p,T,h,s,\dots\}\). Nothing else in the mass or energy balance changes.</p>
+
+<div class="box key">
+  <span class="lab">Combustion needs no heat-release source term</span>
+  <p>One might expect a chemical-energy term \(+\dot Q_{\text{comb}}\) on the right of the energy equation. There is none &mdash; and that is the elegant part. The property library uses <strong>absolute enthalpies that include each species&rsquo; enthalpy of formation.</strong> When fuel and oxygen are consumed and products appear, the mixture&rsquo;s internal energy at fixed \(U\) is simply redistributed: the formation energy released by forming products shows up automatically as a rise in temperature. Energy is conserved by construction. The combustion &ldquo;heat release&rdquo; is an emergent consequence of integrating \(U\) and letting composition change underneath it &mdash; never a term we add by hand.</p>
+</div>
+
+<h5>Why a single explicit step no longer works</h5>
+
+<p>Chemical kinetics introduce <strong>stiffness</strong> (Lecture&nbsp;3). Near ignition, radical pools build and collapse on timescales of microseconds while the piston moves on timescales of milliseconds &mdash; a separation of three or more orders of magnitude. An explicit RK4 step sized for the piston would be wildly unstable for the chemistry; a step sized for the chemistry would make the simulation impossibly slow. We cannot integrate transport and reaction with one method at one step size.</p>
+
+<p>The standard remedy is <strong>operator splitting</strong> (Lie splitting). Over each crank-angle step \(\Delta t\) the two physics are advanced in sequence rather than simultaneously:</p>
+
+<div class="eq"><div class="body">$$ \underbrace{[m,U,m_k]\ \xrightarrow{\text{RK4},\ \text{frozen }Y}\ [m,U,m_k]^{\!*}}_{\text{transport: valves, wall heat, spark, }p\,\mathrm dV}\quad\longrightarrow\quad \underbrace{[m,U,m_k]^{\!*}\ \xrightarrow{\text{stiff CVODE},\ (m,U,V)\,\text{const}}\ [m,U,m_k]}_{\text{reaction at constant volume \& energy}} $$</div><div class="eqn">(11.2)</div></div>
+
+<div class="box key">
+  <span class="lab">The split mirrors the physics</span>
+  <p>The transport substep advances mass, energy, and species by the port and heat fluxes with composition held frozen &mdash; an ordinary non-stiff RK4 step. The reaction substep then holds \((m,U,V)\) fixed and lets the chemistry run to completion over \(\Delta t\) using a dedicated stiff integrator (here Cantera&rsquo;s CVODE through an <code class="inl">IdealGasReactor</code>). Holding \((m,U,V)\) constant during reaction is exactly right: no mass crosses the boundary and no work is done <em>during</em> the chemical relaxation, so internal energy and mass are genuine invariants of that substep and only the species masses change. Each integrator sees only the timescale it is built for.</p>
+</div>
+
+<p>A practical gate makes this affordable: below a cut-off temperature <code class="inl">chem_T_min</code> (here 550&nbsp;K), hydrocarbon oxidation is frozen on engine timescales, so the expensive CVODE call is skipped entirely. Compression or the spark lifts the charge past the gate; thereafter the kinetics decide <em>on their own</em> whether and when the mixture ignites. Both spark-ignition and spontaneous autoignition (knock, or HCCI with the spark disabled) emerge from the same code with no special-casing.</p>
+
+<h5>The spark</h5>
+
+<p>The spark is modelled as a deposit of energy &mdash; a few hundred joules spread over a couple of crank-degrees &mdash; entering the energy equation as a heat term \(\dot Q_{\text{spark}}\). It is deliberately flagged in the source as a <strong>single-zone ignition surrogate</strong>: a real spark ignites a millimetre-scale kernel that then propagates as a turbulent flame, whereas a lumped model has no spatial extent and must instead raise the whole charge past the kinetic gate. It triggers ignition at the right crank angle, which is the intent here; it is not a flame-propagation model.</p>
+
+<pre><div class="codebar"><span>single_cylinder_cantera.py</span><span class="tag">excerpt · one interface, two fluids</span></div><code class="language-python">class ReactingGas:                       # ideal-gas mixture, finite-rate chemistry
+    def flash_du(self, rho, u, Y):       # (rho,u,Y) -> full state    [Eq 11.1 closure]
+        self.gas.UVY = u, 1.0 / rho, Y
+        return self._read()              # x = NaN: single-phase by construction
+    def isentrope_hrho(self, p, s, Y):   # frozen-composition isentrope for the HEM throat
+        self.gas.SPY = s, p, Y
+        return self.gas.enthalpy_mass, self.gas.density
+
+class PureFluid:                         # real fluid with full VLE / two-phase
+    def flash_du(self, rho, u, Y=None):
+        try:
+            self.f.UV = u, 1.0 / rho
+        except ct.CanteraError:
+            self._du_bisect(rho, u)      # u(T,rho) monotone in T -> bisection always lands
+        return self._read()</code></pre>
+
+<div class="box code-note">
+  <span class="lab">The interface is the payoff &mdash; one engine, swappable physics</span>
+  <p>Lecture&nbsp;9 promised that only the equation-of-state function changes. Model&nbsp;B makes that promise structural: <code class="inl">ReactingGas</code> and <code class="inl">PureFluid</code> expose the <em>same</em> methods (<code class="inl">flash_du</code>, <code class="inl">isentrope_hrho</code>, <code class="inl">clone</code>), so the identical <code class="inl">deriv</code> and HEM-valve code drives either a combusting CH&#8324;/air charge <em>or</em> a condensing steam expander. Swap the backend and the same program becomes a different machine. The single-phase mixture reports quality as <code class="inl">NaN</code>; the pure fluid resolves it across the dome &mdash; the rest of the model never knows the difference.</p>
+</div>
+
+<pre><div class="codebar"><span>single_cylinder_cantera.py</span><span class="tag">excerpt · transport deriv + stiff substep</span></div><code class="language-python">def deriv(self, theta_deg, m, U, mk):          # transport only; composition frozen
+    V  = self.cyl.V(theta_deg)
+    Y  = mk / m if self.fluid.n_species else None
+    st = self.fluid.flash_du(m / V, U / m, Y)
+    Qw = self.cyl.h_woschni(st["p"], st["T"]) * self.cyl.A_wall(theta_deg) * (self.cyl.T_wall - st["T"])
+    Qs = self.spark.Qdot(theta_deg, self.cyl.omega)            # spark heat   [single-zone surrogate]
+    dVdt = self.cyl.dVdtheta(theta_deg) * self.cyl.omega
+    md_in, h_in, Y_in = self.intake.mass_flow(theta_deg, st, self.supply_state)
+    md_ex, h_ex, Y_ex = self.exhaust.mass_flow(theta_deg, st, self.exhaust_state)
+    dm  = md_in + md_ex
+    dU  = Qw + Qs - st["p"] * dVdt + md_in * h_in + md_ex * h_ex     # NO combustion source term
+    dmk = md_in * Y_in + md_ex * Y_ex          # species transported by donor Y   [Eq 11.1]
+    return dm, dU, dmk, info
+
+def _chemistry(self, m, U, V, mk, dt):         # stiff reaction at constant (m,U,V)  [Eq 11.2]
+    g = self.fluid.gas
+    g.UVY = U / m, V / m, mk / m
+    if g.T &lt; self.chem_T_min:                  # gate: oxidation frozen below cut-off
+        return mk
+    net = ct.ReactorNet([ct.IdealGasReactor(g)])
+    net.advance(dt)                            # CVODE decides if/when it ignites
+    return m * reactor.thermo.Y.copy()</code></pre>
+
+<div class="box code-note">
+  <span class="lab">Model B in full · <code class="inl">single_cylinder_cantera.py</code></span>
+  <p>Model&nbsp;B keeps every mechanism of Model&nbsp;A &mdash; slider-crank volume, Woschni wall heat, HEM valves with donor upwinding and the <code class="inl">nextafter</code> stabilisation &mdash; and adds species transport, absolute-enthalpy thermodynamics, and the split stiff-chemistry substep. Two builders ship: <code class="inl">build_si_engine</code> (a four-stroke, 720&deg; spark-ignition CH&#8324;/air engine) and <code class="inl">build_steam_expander</code> (the Model&nbsp;A regression on the pure-fluid backend). Disabling the spark on the SI build turns it into an HCCI/knock study driven purely by compression. Run them with:</p>
+</div>
+
+<pre><div class="codebar"><span>shell</span><span class="tag">run Model B</span></div><code class="language-python">pip install cantera numpy matplotlib
+python single_cylinder_cantera.py --demo si       # spark-ignition CH4/air, four-stroke
+python single_cylinder_cantera.py --demo si --no-spark   # compression-only: HCCI / misfire
+python single_cylinder_cantera.py --demo steam    # two-phase expander on the PureFluid backend</code></pre>
+
+<h3 id="part5" class="reveal"><span class="partkicker">Part V</span><br>Coupled systems</h3>
+
+<h4 id="l12"><span class="lec">L12</span>Networks of control volumes &mdash; <span style="color:var(--teal)">Model C</span></h4>
+
+<p>A real engine is not one chamber breathing against two infinite reservoirs. It draws through an intake manifold and discharges into an exhaust pipe, and those passages have their own volume, store their own mass and energy, and exhibit their own pressure dynamics &mdash; ram, reversion, wave action. Model&nbsp;C takes the decisive structural step of the whole series: it treats the manifolds as <strong>control volumes in their own right</strong> and couples several of them into a network.</p>
+
+<div class="box key">
+  <span class="lab">A manifold is just a filling/emptying model with a frozen volume</span>
+  <p>Every tool from Lectures&nbsp;4&ndash;11 applies to a pipe unchanged &mdash; with one simplification. A pipe has no moving boundary, so \(\mathrm dV/\mathrm dt = 0\) and the boundary-work term \(p\,\mathrm dV/\mathrm dt\) vanishes. There is no slider-crank and no Woschni correlation; wall heat is a plain \(\dot Q = UA(T_{\text{wall}}-T)\). What remains is identical: conserved states \([m,U,m_k]\), the same flash, the same HEM ports. A network is therefore not a new kind of model &mdash; it is several copies of the one model, integrated together and sharing their ports.</p>
+</div>
+
+<p>The configuration is the canonical single cylinder with a pipe on each side:</p>
+
+<div class="figure reveal">
+  <svg viewBox="0 0 760 300" role="img" aria-label="Three control-volume network: intake pipe, cylinder, exhaust pipe, with throttle, inlet valves, exhaust valves and tailpipe">
+    <style>.lb{font-family:'Space Grotesk',sans-serif;}.mn{font-family:'JetBrains Mono',monospace;}.cvbox{fill:#fff;stroke:#16202B;stroke-width:2;}.pipebox{fill:#E3EEF0;stroke:#0A4E59;stroke-width:2;}.flow{stroke:#0E6B79;stroke-width:2.5;fill:none;marker-end:url(#ah);}</style>
+    <defs>
+      <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#0E6B79"/></marker>
+    </defs>
+
+    <!-- supply reservoir -->
+    <rect x="14" y="120" width="70" height="56" rx="5" fill="#0E6B79" opacity="0.12" stroke="#0E6B79" stroke-width="1.5"/>
+    <text class="lb" x="49" y="143" text-anchor="middle" font-size="11" fill="#0A4E59">supply</text>
+    <text class="mn" x="49" y="160" text-anchor="middle" font-size="9.5" fill="#0A4E59">p₀, T₀</text>
+
+    <!-- throttle -->
+    <line class="flow" x1="84" y1="148" x2="150" y2="148"/>
+    <text class="lb" x="117" y="138" text-anchor="middle" font-size="9.5" fill="#16202B">throttle</text>
+
+    <!-- intake pipe CV -->
+    <rect class="pipebox" x="152" y="118" width="96" height="60" rx="4"/>
+    <text class="lb" x="200" y="143" text-anchor="middle" font-size="11.5" fill="#0A4E59">intake pipe</text>
+    <text class="mn" x="200" y="160" text-anchor="middle" font-size="9" fill="#0A4E59">fixed V · dV/dt=0</text>
+
+    <!-- inlet valves x2 -->
+    <line class="flow" x1="248" y1="138" x2="312" y2="130"/>
+    <line class="flow" x1="248" y1="158" x2="312" y2="166"/>
+    <text class="lb" x="280" y="120" text-anchor="middle" font-size="9.5" fill="#16202B">2 × IV</text>
+
+    <!-- cylinder CV (with piston) -->
+    <rect class="cvbox" x="314" y="104" width="118" height="88" rx="4"/>
+    <text class="lb" x="373" y="132" text-anchor="middle" font-size="12" fill="#16202B">cylinder</text>
+    <text class="mn" x="373" y="148" text-anchor="middle" font-size="9" fill="#16202B">moving V(θ)</text>
+    <!-- piston -->
+    <rect x="318" y="168" width="110" height="14" fill="#B86A12" opacity="0.85"/>
+    <line x1="373" y1="182" x2="373" y2="210" stroke="#B86A12" stroke-width="3"/>
+    <text class="lb" x="455" y="150" font-size="10" fill="#B86A12">p·dV/dt</text>
+    <text class="lb" x="455" y="164" font-size="9" fill="#B86A12">work</text>
+
+    <!-- exhaust valves x2 -->
+    <line class="flow" x1="432" y1="130" x2="496" y2="138"/>
+    <line class="flow" x1="432" y1="166" x2="496" y2="158"/>
+    <text class="lb" x="464" y="120" text-anchor="middle" font-size="9.5" fill="#16202B">2 × EV</text>
+
+    <!-- exhaust pipe CV -->
+    <rect class="pipebox" x="498" y="118" width="96" height="60" rx="4"/>
+    <text class="lb" x="546" y="143" text-anchor="middle" font-size="11.5" fill="#0A4E59">exhaust pipe</text>
+    <text class="mn" x="546" y="160" text-anchor="middle" font-size="9" fill="#0A4E59">fixed V · dV/dt=0</text>
+
+    <!-- tailpipe -->
+    <line class="flow" x1="594" y1="148" x2="660" y2="148"/>
+    <text class="lb" x="627" y="138" text-anchor="middle" font-size="9.5" fill="#16202B">tailpipe</text>
+
+    <!-- exhaust reservoir -->
+    <rect x="662" y="120" width="84" height="56" rx="5" fill="#A8345F" opacity="0.10" stroke="#A8345F" stroke-width="1.5"/>
+    <text class="lb" x="704" y="143" text-anchor="middle" font-size="11" fill="#A8345F">exhaust</text>
+    <text class="mn" x="704" y="160" text-anchor="middle" font-size="9.5" fill="#A8345F">p_back</text>
+
+    <!-- wall heat hints on pipes -->
+    <text class="mn" x="200" y="106" text-anchor="middle" font-size="8.5" fill="#B86A12">UA · T_wall</text>
+    <text class="mn" x="546" y="106" text-anchor="middle" font-size="8.5" fill="#B86A12">UA · T_wall</text>
+  </svg>
+  <p class="fig-cap"><b>Fig. 12.1 &mdash; A three-volume network.</b> Two fixed-volume pipe control volumes flank the moving-volume cylinder. Six HEM restrictions (throttle, two inlet valves, two exhaust valves, tailpipe) couple them and connect the ends to infinite reservoirs. All nine states &mdash; three sets of \([m,U,m_k]\) &mdash; are advanced in lockstep by one RK4 integrator.</p>
+</div>
+
+<h5>Sign bookkeeping is the one real subtlety</h5>
+
+<p>Each valve connects two control volumes, and a single mass flow must appear in <em>both</em> of their balances with opposite sign &mdash; what leaves one volume enters the other. The valve routine returns the flow <strong>into the cylinder</strong> (the convention from Lecture&nbsp;6); the pipe on the other side therefore sees the <em>negated</em> value. Getting this consistent is what conserves mass across the whole network.</p>
+
+<div class="box warn">
+  <span class="lab">One flow, two ledgers, opposite signs</span>
+  <p>If the inlet-valve routine reports \(\dot m_{\text{IV}}>0\) meaning gas flowing from the intake pipe into the cylinder, then the cylinder gains \(+\dot m_{\text{IV}}\) and the intake pipe loses it, contributing \(-\dot m_{\text{IV}}\) to the pipe&rsquo;s \(\mathrm dm/\mathrm dt\). The exhaust side mirrors this: a flow reported as &ldquo;into the cylinder&rdquo; through an exhaust valve (reversion) is a loss for the exhaust pipe. A sign error here does not crash the run &mdash; it quietly destroys mass, and the only symptom is a slow drift in the global inventory. The conservation check of Lecture&nbsp;13 exists precisely to catch it.</p>
+</div>
+
+<pre><div class="codebar"><span>single_cylinder_two_pipes.py</span><span class="tag">excerpt · three coupled balances</span></div><code class="language-python"># valve routines return flow INTO the cylinder (+ve); pipes negate it.
+md_th, h_th, Y_th = self.throttle.mass_flow(theta_deg, st_i, self.supply_state)   # supply -> intake pipe
+iv = [v.mass_flow(theta_deg, st_c, st_i) for v in self.inlet_valves]             # intake pipe -> cylinder
+ev = [v.mass_flow(theta_deg, st_c, st_e) for v in self.exhaust_valves]           # cylinder <-> exhaust pipe
+md_tp, h_tp, Y_tp = self.tailpipe.mass_flow(theta_deg, st_e, self.exhaust_state) # exhaust pipe -> reservoir
+sum_iv0, sum_ev0 = sum(f[0] for f in iv), sum(f[0] for f in ev)
+
+# ---- cylinder: moving volume, keeps the p dV work term ----
+dm_c = sum_iv0 + sum_ev0
+dU_c = Qw_c + Qs_c - st_c["p"] * dVdt + sum(f[0]*f[1] for f in iv) + sum(f[0]*f[1] for f in ev)
+
+# ---- intake pipe: throttle IN, inlet valves OUT (sign-flipped) ----
+dm_i = md_th - sum_iv0
+dU_i = Qw_i + md_th * h_th - sum(f[0]*f[1] for f in iv)        # NO p dV term: dV/dt = 0
+
+# ---- exhaust pipe: exhaust valves IN (sign-flipped), tailpipe OUT ----
+dm_e = -sum_ev0 + md_tp
+dU_e = Qw_e - sum(f[0]*f[1] for f in ev) + md_tp * h_tp        # NO p dV term: dV/dt = 0</code></pre>
+
+<h5>The throttle and the valves</h5>
+
+<p>The valves are the HEM restrictions of Lecture&nbsp;10 with a crank-angle lift schedule; splitting the intake and exhaust into two valves apiece simply halves each geometric area. The <strong>throttle</strong> is a butterfly plate whose effective area follows the plate angle \(\theta_t\),</p>
+
+<div class="eq"><div class="body">$$ A_{\text{thr}}(\theta_t) \;=\; \frac{\pi D^2}{4}\,\bigl(1 - \cos\theta_t\bigr), $$</div><div class="eqn">(12.1)</div></div>
+
+<p>and may be held constant or driven by a function of crank angle for transient studies. It is the operator&rsquo;s load control: a nearly closed plate starves the intake pipe and the manifold pressure falls, throttling the engine exactly as in practice.</p>
+
+<pre><div class="codebar"><span>single_cylinder_two_pipes.py</span><span class="tag">excerpt · butterfly area</span></div><code class="language-python">class ThrottleBody(HEMValve):
+    def area(self, theta_crank_deg):                 # constant OR callable schedule
+        theta_t = self.theta_fn(theta_crank_deg) if callable(self.theta_fn) else self.theta_fn
+        theta_t = np.clip(theta_t, 0.0, 90.0)
+        return 0.25 * np.pi * self.D**2 * (1.0 - np.cos(np.deg2rad(theta_t)))   # [Eq 12.1]</code></pre>
+
+<h5>Scavenging, and what a single-zone model can and cannot say</h5>
+
+<p>When intake and exhaust valves are open together &mdash; valve overlap, and the whole working principle of a two-stroke &mdash; fresh charge pushes burned gas out while some of it escapes straight through. Because the cylinder is a single well-mixed control volume, Model&nbsp;C represents this as <strong>perfect-mixing scavenging</strong>: incoming charge mixes instantly with the residual, and the gas leaving through the exhaust valve carries that blend.</p>
+
+<div class="box def">
+  <span class="lab">Perfect-mixing scavenging &mdash; honest about its own limits</span>
+  <p>The single-zone assumption captures <strong>short-circuit loss</strong> correctly &mdash; some fresh charge does leave unburned, because the exhaust draws the mixed cylinder composition &mdash; and it makes the <strong>delivery ratio</strong> (mass actually delivered per cycle, normalised by displacement) and the <strong>gross IMEP</strong> rigorous. What it cannot capture is spatial displacement: a real loop- or uniflow-scavenged cylinder pushes burned gas out ahead of the fresh charge with far less mixing, achieving scavenging efficiencies of perhaps 70&ndash;85% where perfect mixing predicts only 50&ndash;60%. The model therefore <em>under-predicts</em> scavenging efficiency by construction. Knowing that boundary &mdash; trusting the delivery ratio, distrusting the absolute trapped-purity &mdash; is the difference between using the model and being misled by it.</p>
+</div>
+
+<p>The companion routine <code class="inl">scavenging_metrics()</code> post-processes a completed run into the delivery ratio and gross indicated mean effective pressure (work per cycle divided by displaced volume), the two figures that actually characterise the gas exchange.</p>
+
+<div class="box code-note">
+  <span class="lab">Model C in full · <code class="inl">single_cylinder_two_pipes.py</code></span>
+  <p>Model&nbsp;C reuses the entire Cantera fluid interface, HEM valve, and stiff-chemistry substep of Model&nbsp;B &mdash; chemistry runs on the cylinder only &mdash; and integrates nine states (cylinder, intake pipe, exhaust pipe) in one lockstep RK4. Two builders ship: <code class="inl">build_si_engine_two_pipes</code> (a throttled four-stroke with two valves per side) and <code class="inl">build_two_stroke</code> (a 360&deg; cycle with genuine scavenging through valve overlap). Run them, and read off the gas-exchange metrics, with:</p>
+</div>
+
+<pre><div class="codebar"><span>shell</span><span class="tag">run Model C</span></div><code class="language-python">pip install cantera numpy matplotlib
+python single_cylinder_two_pipes.py --IC-demo 4str   # throttled four-stroke, intake+exhaust pipes
+python single_cylinder_two_pipes.py --IC-demo 2str   # two-stroke; prints delivery ratio & gross IMEP</code></pre>
+
+<h3 id="part6" class="reveal"><span class="partkicker">Part VI</span><br>Practice</h3>
+
+<h4 id="l13"><span class="lec">L13</span>Verification, validation, and extension</h4>
+
+<p>Lecture&nbsp;1 drew the distinction that now matters most. <strong>Verification</strong> asks whether we are solving the equations correctly &mdash; a question of mathematics and code. <strong>Validation</strong> asks whether they are the right equations &mdash; a question of physics, answered only against experiment. A model can be impeccably verified and still wrong, or physically sound and ruined by a coding slip. Both must be checked, and verification comes first: there is no point comparing a buggy program to data.</p>
+
+<h5>Verification 1 &mdash; conservation under a closed boundary</h5>
+
+<p>Close every valve and the cylinder becomes an isolated mass. With \(\dot m = 0\) at every port, total mass must be constant to round-off for the entire run, regardless of how violently the piston moves. Energy must obey the closed-system statement exactly &mdash; the only changes to \(U\) come from wall heat and boundary work,</p>
+
+<div class="eq"><div class="body">$$ \frac{\mathrm dm}{\mathrm dt}=0, \qquad \frac{\mathrm dU}{\mathrm dt} = \dot Q_{\text{wall}} - p\,\frac{\mathrm dV}{\mathrm dt}. $$</div><div class="eqn">(13.1)</div></div>
+
+<p>Set the wall heat to zero as well and the compression&ndash;expansion must be reversible: the pressure&ndash;volume loop should close on itself with no net area and no entropy generation over a cycle. Any drift in mass, or an open \(p\)&ndash;\(V\) loop under adiabatic closed conditions, is a verification failure &mdash; almost always a sign-bookkeeping error of the kind Lecture&nbsp;12 warned about, or a time step too coarse for the integrator.</p>
+
+<h5>Verification 2 &mdash; the adiabatic rigid-tank filling benchmark</h5>
+
+<p>One filling problem has a clean closed-form answer, and every filling/emptying code should reproduce it. Fill an evacuated, rigid, adiabatic tank from a large reservoir held at \((p_s,T_s)\). Rigid means \(\mathrm dV/\mathrm dt=0\) so there is no boundary work; adiabatic means \(\dot Q=0\). The energy balance (Lecture&nbsp;4) collapses to \(\mathrm dU/\mathrm dt=\dot m\,h_s\), and because the reservoir enthalpy \(h_s\) is constant, integrating from empty gives \(U=m\,h_s\), i.e. the final <em>specific internal energy equals the reservoir specific enthalpy.</em> For an ideal gas, \(u=c_vT\) and \(h_s=c_pT_s\), so</p>
+
+<div class="eq"><div class="body">$$ c_v T_{\text{final}} = c_p T_s \quad\Longrightarrow\quad T_{\text{final}} = \gamma\,T_s. $$</div><div class="eqn">(13.2)</div></div>
+
+<div class="box key">
+  <span class="lab">Why the filled tank runs hot &mdash; and why it is the perfect test</span>
+  <p>The gas already inside is compressed by the gas flowing in, and the inflow carries <em>flow work</em> \(p_sv_s\) in addition to its internal energy &mdash; that is the difference between \(h_s\) and \(u_s\). Both effects deposit energy with no way for it to leave a rigid adiabatic vessel, so the final temperature overshoots the supply temperature by the factor \(\gamma\) (about 1.4 for air &mdash; a 40% rise). The result follows from the energy equation alone, independent of the flow law, the valve area, or the time step. Run the ideal-gas sandbox of Lecture&nbsp;4 to steady fill and it must return \(\gamma T_s\) to several digits. If it does not, the energy bookkeeping &mdash; most often a missing or mis-signed flow-work term &mdash; is wrong, and no amount of physical realism elsewhere will save the model.</p>
+</div>
+
+<h5>Verification 3 &mdash; step refinement</h5>
+
+<p>Halve the crank-angle step and the solution should stop changing &mdash; and for the RK4 integrator of Lecture&nbsp;3, the error should fall as roughly the fourth power of the step until property-evaluation round-off sets the floor. If results keep shifting as the step shrinks, the run was never step-converged and any conclusion drawn from it is an artefact of the discretisation, not the physics. Report results only in the converged regime, and quote the step at which convergence was confirmed.</p>
+
+<h5>Common failure modes</h5>
+
+<p>The companion models encode hard-won defences against four recurring pathologies, each met earlier in these notes:</p>
+
+<div class="box warn">
+  <span class="lab">Four ways a filling/emptying model breaks &mdash; and the fix in the code</span>
+  <p><strong>Division by zero at pressure equality.</strong> When a port pressure exactly equals the cylinder pressure, a naive flow law divides by a zero pressure difference and returns <code class="inl">NaN</code>, which then poisons every subsequent step. The always-positive-\(\Delta p\) rule of Lecture&nbsp;8 &mdash; the <code class="inl">nextafter</code> stabilisation &mdash; prevents it structurally.</p>
+  <p><strong>Flash stalls on the saturation dome.</strong> General \((\rho,u)\) inverters can fail to converge right at the phase boundary. The monotone-temperature bisection fallback of Lecture&nbsp;9 always lands, so the simulation crosses the dome without stalling.</p>
+  <p><strong>Stiff blow-up from chemistry.</strong> Integrating fast kinetics with the explicit transport step detonates the solution numerically. Operator splitting (Lecture&nbsp;11) quarantines the stiffness in a dedicated implicit substep.</p>
+  <p><strong>Silent mass loss.</strong> A sign error on a shared port flow (Lecture&nbsp;12) destroys mass with no crash and no warning. Only the closed-boundary conservation check above reveals it &mdash; which is why that check is run first and always.</p>
+</div>
+
+<h5>Where to take these models next</h5>
+
+<p>Every extension reuses the same architecture &mdash; conserved states in, flash, ports, integrate &mdash; and adds states or elements without disturbing what exists. A natural progression:</p>
+
+<ul>
+  <li><strong>Dynamic piston.</strong> Replace the prescribed slider-crank with a free piston by promoting position and velocity to states \([m,U,x,\dot x]\) and adding Newton&rsquo;s second law with pressure, spring, friction, and load forces. The volume is then solved with the thermodynamics rather than imposed &mdash; the route to free-piston engines, pneumatic actuators, and bounce chambers.</li>
+  <li><strong>Pipes with inertia and friction.</strong> Upgrade the fixed-volume manifolds from lumped plenums toward lumped-momentum or one-dimensional gas dynamics, capturing the ram and wave-tuning effects a single well-mixed volume cannot represent.</li>
+  <li><strong>More volumes, more cylinders.</strong> The network of Lecture&nbsp;12 extends directly to multi-cylinder engines sharing a plenum, to turbocharger volumes, or to any plant of vessels and restrictions &mdash; each volume one more copy of the same model.</li>
+  <li><strong>Richer thermodynamics and chemistry.</strong> Swap the property backend (Lecture&nbsp;9), enlarge the reaction mechanism, add pollutant or soot kinetics, or model a separated two-phase vessel by drawing saturated vapour or saturated liquid from the appropriate port rather than the mixed contents.</li>
+</ul>
+
+<p>The thread running through all thirteen lectures is a single discipline: integrate the quantities nature conserves, evaluate everything else from them, and let the difficult behaviour &mdash; choking, flashing, ignition, reversion, scavenging &mdash; emerge from honest equations rather than be patched in by hand. Master that, and the three companion programs are not three different models but one idea, deepened.</p>
+
+<h4 id="appx"><span class="lec">A</span>Reference &amp; exercises</h4>
+
+<p>A compact reference to the symbols, governing equations, and companion programs, followed by exercises that build directly on the lectures.</p>
+
+<h5>A.1 &nbsp; Nomenclature</h5>
+
+<div class="tablewrap">
+<table>
+  <caption>Principal symbols. SI units throughout.</caption>
+  <thead><tr><th>Symbol</th><th>Meaning</th><th>Units</th></tr></thead>
+  <tbody>
+    <tr><td><code>m</code>, <code>U</code></td><td>Control-volume mass and total internal energy (the conserved states)</td><td>kg, J</td></tr>
+    <tr><td><code>m_k</code>, <code>Y_k</code></td><td>Species mass and mass fraction, \(Y_k=m_k/m\)</td><td>kg, &ndash;</td></tr>
+    <tr><td><code>V</code>, <code>&theta;</code></td><td>Cylinder volume; crank angle</td><td>m³, rad</td></tr>
+    <tr><td><code>&rho;</code>, <code>u</code></td><td>Density \(m/V\) and specific internal energy \(U/m\)</td><td>kg/m³, J/kg</td></tr>
+    <tr><td><code>p</code>, <code>T</code></td><td>Pressure, temperature (from the flash)</td><td>Pa, K</td></tr>
+    <tr><td><code>h</code>, <code>s</code></td><td>Specific enthalpy, specific entropy</td><td>J/kg, J/kg·K</td></tr>
+    <tr><td><code>x</code></td><td>Vapour quality (\(0\) liquid, \(1\) vapour; NaN single-phase)</td><td>&ndash;</td></tr>
+    <tr><td><code>&mdot;</code>, <code>G</code></td><td>Mass flow rate; mass flux \(\dot m/A\)</td><td>kg/s, kg/m²·s</td></tr>
+    <tr><td><code>C_d</code>, <code>A</code></td><td>Discharge coefficient; flow area</td><td>&ndash;, m²</td></tr>
+    <tr><td><code>Q̇</code>, <code>Ẇ</code></td><td>Heat-transfer rate into the CV; work rate</td><td>W, W</td></tr>
+    <tr><td><code>&gamma;</code>, <code>c_p</code>, <code>c_v</code></td><td>Specific-heat ratio and specific heats</td><td>&ndash;, J/kg·K</td></tr>
+    <tr><td><code>p₀</code>, <code>h₀</code>, <code>s₀</code></td><td>Donor stagnation state defining the HEM throat isentrope</td><td>Pa, J/kg, J/kg·K</td></tr>
+    <tr><td><code>p*</code></td><td>Critical (choking) throat pressure</td><td>Pa</td></tr>
+    <tr><td><code>UA</code></td><td>Overall heat-transfer conductance (pipe walls)</td><td>W/K</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h5>A.2 &nbsp; Governing equations</h5>
+
+<div class="tablewrap">
+<table>
+  <caption>The model in one page, by lecture.</caption>
+  <thead><tr><th>#</th><th>Relation</th><th>Role</th></tr></thead>
+  <tbody>
+    <tr><td>(4.4)</td><td>\(\dot m=\sum_k\dot m_k\); &nbsp; \(\dot U=\dot Q_{\text{CV}}+\dot W_{\text{on}}-p\,\dot V+\sum_k\dot H_k\)</td><td>Mass &amp; energy balance of the control volume</td></tr>
+    <tr><td>(4.3)</td><td>\(\dot H_k=\dot m_k h_{\text{donor}}\) &nbsp;(inflow: reservoir \(h\); outflow: CV \(h\))</td><td>Donor upwinding of port enthalpy</td></tr>
+    <tr><td>(5.1)</td><td>\(V(\theta)=V_c+A_p\,s(\theta)\), slider-crank \(s(\theta)\)</td><td>Prescribed moving boundary</td></tr>
+    <tr><td>(6.2)</td><td>\(\dot m=C_dA\,\mathrm{sgn}(\Delta p)\sqrt{2\rho_{\text{up}}|\Delta p|}\)</td><td>Incompressible orifice (low-speed limit)</td></tr>
+    <tr><td>(7.2)</td><td>\(h_c=3.26\,B^{-0.2}(p/1000)^{0.8}T^{-0.55}w^{0.8}\)</td><td>Woschni in-cylinder wall heat coefficient</td></tr>
+    <tr><td>(8.1)</td><td>\(p_{\text{out}}=\min\!\big(\mathrm{nextafter}(p_{\text{in}},-\infty),\,p_{\text{out}}\big)\)</td><td>Always-positive \(\Delta p\) stabilisation</td></tr>
+    <tr><td>(9.1)</td><td>\((\rho,u)\to\{p,T,h,s,x\}\)</td><td>Equation-of-state flash</td></tr>
+    <tr><td>(10.1)</td><td>\(G(p_t)=\rho(p_t,s_0)\sqrt{2(h_0-h(p_t,s_0))}\)</td><td>HEM isentropic-nozzle mass flux</td></tr>
+    <tr><td>(10.2)</td><td>\(\dot m=C_dA\,\max_{p_t}G(p_t)\)</td><td>Choking as a maximisation</td></tr>
+    <tr><td>(11.1)</td><td>\(\dot m_k=\sum\dot m_{\text{port}}\,Y_{k,\text{donor}}\)</td><td>Species transport</td></tr>
+    <tr><td>(11.2)</td><td>RK4 transport &rarr; constant-\((m,U,V)\) CVODE reaction</td><td>Operator (Lie) splitting for stiffness</td></tr>
+    <tr><td>(12.1)</td><td>\(A_{\text{thr}}=\tfrac{\pi D^2}{4}(1-\cos\theta_t)\)</td><td>Butterfly throttle area</td></tr>
+    <tr><td>(13.2)</td><td>\(T_{\text{final}}=\gamma\,T_s\)</td><td>Adiabatic rigid-tank filling benchmark</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h5>A.3 &nbsp; The three companion models at a glance</h5>
+
+<div class="tablewrap">
+<table>
+  <caption>Each model reuses the previous architecture and adds one layer of complexity.</caption>
+  <thead><tr><th>Model</th><th>File</th><th>Fluid backend</th><th>Adds</th><th>Run</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><b>A</b></td>
+      <td><code>single_cylinder_hem.py</code></td>
+      <td>CoolProp (HEOS)</td>
+      <td>Single CV; phase change; HEM valves with choking &amp; flashing; Woschni; <code>nextafter</code> rule</td>
+      <td><code>python single_cylinder_hem.py</code></td>
+    </tr>
+    <tr>
+      <td><b>B</b></td>
+      <td><code>single_cylinder_cantera.py</code></td>
+      <td>Cantera &mdash; <code>ReactingGas</code> <i>or</i> <code>PureFluid</code></td>
+      <td>Species transport; absolute-enthalpy combustion; spark/autoignition; operator-split stiff chemistry</td>
+      <td><code>... --demo si</code> · <code>--demo steam</code> · <code>--no-spark</code></td>
+    </tr>
+    <tr>
+      <td><b>C</b></td>
+      <td><code>single_cylinder_two_pipes.py</code></td>
+      <td>Cantera (shared with B)</td>
+      <td>Three coupled CVs; manifolds as fixed-V volumes; throttle; perfect-mixing scavenging; DR &amp; IMEP</td>
+      <td><code>... --IC-demo 4str</code> · <code>--IC-demo 2str</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h5>A.4 &nbsp; Exercises</h5>
+
+<p>These run from pure verification through physical extension, roughly in order of difficulty.</p>
+
+<ol>
+  <li><b>Closed-boundary conservation.</b> Take the ideal-gas sandbox of Lecture&nbsp;4, shut both valves, and integrate for several piston cycles with the wall heat first off, then on. Confirm mass is constant to round-off in both cases, and that the adiabatic \(p\)&ndash;\(V\) loop closes with zero net area. Plot the mass-conservation residual against time.</li>
+  <li><b>The \(\gamma T_s\) benchmark.</b> Fill a rigid, adiabatic tank from a reservoir and verify the steady result \(T_{\text{final}}=\gamma T_s\) of (13.2) to three significant figures. Then add wall heat and explain &mdash; physically, before re-running &mdash; whether the final temperature rises above or falls below \(\gamma T_s\).</li>
+  <li><b>Order of accuracy.</b> Run Model&nbsp;A at a sequence of halving crank-angle steps and plot the change in a cycle-integrated quantity (say, work per cycle) against step size on log axes. Confirm the RK4 slope until the property round-off floor appears, and identify the step at which the result is converged.</li>
+  <li><b>Choking by inspection.</b> For a fixed donor state in Model&nbsp;A, evaluate \(G(p_t)\) of (10.1) across the throat-pressure interval and plot it. Locate the peak \(p^\*\), then drive the receiver pressure above and below it and confirm the delivered flux switches between the endpoint and the capped peak exactly as (10.2) predicts.</li>
+  <li><b>Spark timing.</b> In Model&nbsp;B&rsquo;s SI build, sweep the spark crank angle and record peak pressure and gross work per cycle. Find the timing that maximises work, and relate the loss at over-advanced and over-retarded timing to where combustion falls relative to top dead centre.</li>
+  <li><b>Autoignition without a spark.</b> Disable the spark and raise the compression ratio (or supply temperature) until the charge autoignites from compression alone. Identify the onset condition and discuss it as the boundary between HCCI operation and knock.</li>
+  <li><b>Scavenging trade-off.</b> In Model&nbsp;C&rsquo;s two-stroke build, vary the valve-overlap window and plot delivery ratio against the short-circuited fresh-charge fraction. Explain why the perfect-mixing assumption makes the delivery ratio trustworthy but the absolute trapped purity pessimistic.</li>
+  <li><b>Free-piston extension.</b> Promote piston position and velocity to states and add Newton&rsquo;s second law (pressure, spring, friction, load), as sketched in Lecture&nbsp;13. Reproduce the prescribed-motion result in the stiff-spring limit, then explore a genuinely free bounce.</li>
+</ol>
+
+<div class="footer">
+  <p><strong>Numerical Modelling of Filling &amp; Emptying Systems.</strong> A thirteen-lecture series taking the conservation laws from a single lumped chamber to reacting, multi-volume engine simulations, built around three companion programs: <code class="inl">single_cylinder_hem.py</code> (CoolProp, phase change), <code class="inl">single_cylinder_cantera.py</code> (Cantera, reacting or two-phase), and <code class="inl">single_cylinder_two_pipes.py</code> (Cantera, three-volume network).</p>
+  <p>One discipline throughout: integrate what nature conserves, evaluate the rest from it, and let the difficult behaviour emerge from honest equations.</p>
+</div>
+
+</div><!-- /.col -->
+</main><!-- /.main -->
+</div><!-- /.wrap -->
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---- syntax highlighting (graceful if CDN blocked) ---- */
+  try {
+    if (window.hljs) {
+      document.querySelectorAll('pre code').forEach(function (b) {
+        try { window.hljs.highlightElement(b); } catch (e) {}
+      });
+    }
+  } catch (e) {}
+
+  /* ---- mobile nav toggle ---- */
+  var body = document.body;
+  var navbtn = document.getElementById('navbtn');
+  var scrim = document.getElementById('scrim');
+  function closeNav() { body.classList.remove('nav-open'); }
+  if (navbtn) navbtn.addEventListener('click', function () { body.classList.toggle('nav-open'); });
+  if (scrim) scrim.addEventListener('click', closeNav);
+
+  /* ---- smooth scroll + close nav on TOC click ---- */
+  var tocLinks = Array.prototype.slice.call(document.querySelectorAll('.toc a[href^="#"]'));
+  tocLinks.forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      var id = a.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if (el) {
+        ev.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', '#' + id);
+        closeNav();
+      }
+    });
+  });
+
+  /* ---- scrollspy: highlight the section currently under the top of the viewport ---- */
+  var targets = [];
+  tocLinks.forEach(function (a) {
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if (el) targets.push({ a: a, el: el });
+  });
+  var ticking = false;
+  function syncActive() {
+    ticking = false;
+    var offset = 130, current = targets.length ? targets[0].a : null;
+    for (var i = 0; i < targets.length; i++) {
+      if (targets[i].el.getBoundingClientRect().top <= offset) current = targets[i].a;
+    }
+    tocLinks.forEach(function (l) { l.classList.toggle('active', l === current); });
+  }
+  function onScroll() {
+    if (!ticking) { ticking = true; window.requestAnimationFrame(syncActive); }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  syncActive();
+
+  /* ---- reveal-on-scroll ---- */
+  var reveals = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && reveals.length) {
+    var ro = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    reveals.forEach(function (r) { ro.observe(r); });
+  } else {
+    reveals.forEach(function (r) { r.classList.add('in'); });
+  }
+
+  /* =====================================================================
+     Interactive Lecture-4 sandbox: adiabatic rigid-tank filling, ideal-gas air.
+     States [m, U]; explicit Euler; compressible orifice with choking.
+     Reservoir is the upstream donor at (p_s, T_s); tank fills until p -> p_s.
+     ===================================================================== */
+  var canvas = document.getElementById('fillCanvas');
+  if (canvas && canvas.getContext) {
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+
+    // gas + vessel constants (air)
+    var R = 287.0, GAM = 1.4, CP = 1004.5, CV = 717.5;
+    var TS = 300.0;                 // reservoir (and initial) temperature [K]
+    var VTANK = 1.0e-3;             // 1 litre rigid vessel [m^3]
+    var P0 = 1.0e5;                 // initial tank pressure [Pa]
+    var PCRIT_RATIO = Math.pow(2 / (GAM + 1), GAM / (GAM - 1)); // ~0.528
+
+    // integration / animation
+    var DT = 1.0e-3, NSUB = 18, T_END = 2.0;
+
+    // palette (mirror the document tokens)
+    var COL_P = '#34b3c4', COL_T = '#d98a2b', AX = '#5b6b78', GRID = '#1b222b',
+        TXT = '#9fb0bd', INK = '#dfe7ec';
+
+    var raf = null, t = 0, m = 0, U = 0, running = false;
+    var ts = [], ps = [], Ts = [], lastChoked = false, lastMdot = 0;
+
+    // plot frame
+    var L = 60, Rr = 56, Tp = 22, Bt = 44;
+    var x0 = L, x1 = W - Rr, y0 = Tp, y1 = H - Bt;
+
+    // axis ranges (fixed for a stable, readable plot)
+    function pRange() {
+      var psBar = curr.ps;                       // bar
+      return [0.85, psBar * 1.04];
+    }
+    function tRange() { return [288, GAM * TS * 1.06]; }
+
+    var curr = { ps: 5.0, A: 8.0e-6, cd: 0.80 };  // captured at Run
+
+    function readSliders() {
+      var sp = document.getElementById('ps'),
+          sa = document.getElementById('area'),
+          sc = document.getElementById('cd');
+      curr.ps = parseFloat(sp.value);
+      curr.A = parseFloat(sa.value) * 1e-6;       // mm^2 -> m^2
+      curr.cd = parseFloat(sc.value);
+    }
+
+    function xMap(tt) { return x0 + (tt / T_END) * (x1 - x0); }
+    function map(v, lo, hi) { return y1 - (v - lo) / (hi - lo) * (y1 - y0); }
+
+    function drawFrame() {
+      ctx.clearRect(0, 0, W, H);
+      var pr = pRange(), tr = tRange();
+
+      // grid + frame
+      ctx.strokeStyle = GRID; ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (var gx = 0; gx <= 4; gx++) { var xx = x0 + (gx / 4) * (x1 - x0); ctx.moveTo(xx, y0); ctx.lineTo(xx, y1); }
+      for (var gy = 0; gy <= 4; gy++) { var yy = y0 + (gy / 4) * (y1 - y0); ctx.moveTo(x0, yy); ctx.lineTo(x1, yy); }
+      ctx.stroke();
+
+      ctx.strokeStyle = AX; ctx.lineWidth = 1.3;
+      ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+
+      // choke threshold (tank pressure = 0.528 * p_s)
+      var pChokeBar = PCRIT_RATIO * curr.ps;
+      if (pChokeBar >= pr[0] && pChokeBar <= pr[1]) {
+        var yc = map(pChokeBar, pr[0], pr[1]);
+        ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = '#7a5a86'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x0, yc); ctx.lineTo(x1, yc); ctx.stroke(); ctx.restore();
+        ctx.fillStyle = '#9b7aa6'; ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.textAlign = 'right'; ctx.fillText('choke p/p\u209B=0.53', x1 - 6, yc - 4);
+      }
+
+      // axis labels & ticks
+      ctx.fillStyle = TXT; ctx.font = "11px 'Space Grotesk', sans-serif";
+      ctx.textAlign = 'center';
+      ctx.fillText('time  [s]', (x0 + x1) / 2, H - 12);
+      for (var i = 0; i <= 4; i++) {
+        var tx = x0 + (i / 4) * (x1 - x0);
+        ctx.fillText((T_END * i / 4).toFixed(1), tx, y1 + 16);
+      }
+      // left axis (pressure, teal)
+      ctx.save(); ctx.translate(15, (y0 + y1) / 2); ctx.rotate(-Math.PI / 2);
+      ctx.fillStyle = COL_P; ctx.fillText('pressure  [bar]', 0, 0); ctx.restore();
+      ctx.fillStyle = COL_P; ctx.textAlign = 'right'; ctx.font = "10px 'JetBrains Mono', monospace";
+      for (var j = 0; j <= 4; j++) {
+        var pv = pr[0] + (j / 4) * (pr[1] - pr[0]);
+        ctx.fillText(pv.toFixed(1), x0 - 6, map(pv, pr[0], pr[1]) + 3);
+      }
+      // right axis (temperature, amber)
+      ctx.save(); ctx.translate(W - 13, (y0 + y1) / 2); ctx.rotate(-Math.PI / 2);
+      ctx.fillStyle = COL_T; ctx.textAlign = 'center'; ctx.font = "11px 'Space Grotesk', sans-serif";
+      ctx.fillText('temperature  [K]', 0, 0); ctx.restore();
+      ctx.fillStyle = COL_T; ctx.textAlign = 'left'; ctx.font = "10px 'JetBrains Mono', monospace";
+      for (var k = 0; k <= 4; k++) {
+        var tv = tr[0] + (k / 4) * (tr[1] - tr[0]);
+        ctx.fillText(tv.toFixed(0), x1 + 6, map(tv, tr[0], tr[1]) + 3);
+      }
+
+      // curves
+      function poly(arr, rng, col) {
+        if (ts.length < 2) return;
+        ctx.strokeStyle = col; ctx.lineWidth = 2.2; ctx.beginPath();
+        for (var n = 0; n < ts.length; n++) {
+          var X = xMap(ts[n]), Y = map(arr[n], rng[0], rng[1]);
+          if (n === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+        }
+        ctx.stroke();
+      }
+      poly(ps, pr, COL_P);
+      poly(Ts, tr, COL_T);
+
+      // gamma*Ts reference
+      var gT = GAM * TS;
+      if (gT >= tr[0] && gT <= tr[1]) {
+        var yg = map(gT, tr[0], tr[1]);
+        ctx.save(); ctx.setLineDash([2, 4]); ctx.strokeStyle = COL_T; ctx.globalAlpha = 0.5;
+        ctx.beginPath(); ctx.moveTo(x0, yg); ctx.lineTo(x1, yg); ctx.stroke(); ctx.restore();
+        ctx.fillStyle = COL_T; ctx.globalAlpha = 0.8; ctx.textAlign = 'left';
+        ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.fillText('\u03B3T\u209B = ' + gT.toFixed(0) + ' K', x0 + 6, yg - 4); ctx.globalAlpha = 1;
+      }
+
+      // legend
+      ctx.font = "11px 'Space Grotesk', sans-serif"; ctx.textAlign = 'left';
+      ctx.fillStyle = COL_P; ctx.fillRect(x0 + 8, y0 + 8, 14, 3);
+      ctx.fillStyle = INK; ctx.fillText('p(t)', x0 + 26, y0 + 12);
+      ctx.fillStyle = COL_T; ctx.fillRect(x0 + 64, y0 + 8, 14, 3);
+      ctx.fillStyle = INK; ctx.fillText('T(t)', x0 + 82, y0 + 12);
+    }
+
+    function setReadout(msg) {
+      var p_bar = (m > 0 ? (m * R * (U / m / CV) / VTANK) / 1e5 : P0 / 1e5);
+      var T_K = (m > 0 ? (U / m) / CV : TS);
+      var fill = Math.max(0, Math.min(100, (p_bar / curr.ps) * 100));
+      var el = document.getElementById('readout');
+      if (!el) return;
+      el.innerHTML =
+        '<b>p</b> ' + p_bar.toFixed(3) + ' bar &nbsp; ' +
+        '<b>T</b> ' + T_K.toFixed(1) + ' K &nbsp; ' +
+        '<b>m</b> ' + (m * 1e3).toFixed(3) + ' g &nbsp; ' +
+        '<b>m&#775;</b> ' + lastMdot.toExponential(2) + ' kg/s<br>' +
+        '<b>fill</b> ' + fill.toFixed(0) + '% (p/p\u209B) &nbsp; ' +
+        '<b>flow</b> ' + (lastChoked ? 'CHOKED' : 'subcritical') +
+        (msg ? ' &nbsp; \u2014 ' + msg : '');
+    }
+
+    function substep() {
+      var u = U / m, T = u / CV, p = m * R * T / VTANK;
+      var ps_pa = curr.ps * 1e5, mdot = 0;
+      if (p < ps_pa) {
+        var rpr = Math.min(p / ps_pa, 1 - 1e-9);   // always-positive Dp guard (Lecture 8)
+        if (rpr <= PCRIT_RATIO) {                   // choked
+          mdot = curr.cd * curr.A * ps_pa * Math.sqrt(GAM / (R * TS)) *
+                 Math.pow(2 / (GAM + 1), (GAM + 1) / (2 * (GAM - 1)));
+          lastChoked = true;
+        } else {                                    // subcritical
+          mdot = curr.cd * curr.A * ps_pa * Math.sqrt(
+                 (2 * GAM / ((GAM - 1) * R * TS)) *
+                 (Math.pow(rpr, 2 / GAM) - Math.pow(rpr, (GAM + 1) / GAM)));
+          lastChoked = false;
+        }
+      }
+      lastMdot = mdot;
+      m += mdot * DT;
+      U += mdot * CP * TS * DT;       // donor enthalpy h_s = cp*Ts; rigid + adiabatic
+    }
+
+    function step() {
+      for (var s = 0; s < NSUB; s++) { substep(); t += DT; if (t >= T_END) break; }
+      ts.push(t);
+      ps.push(m * R * (U / m / CV) / VTANK / 1e5);
+      Ts.push((U / m) / CV);
+      drawFrame();
+
+      var ps_pa = curr.ps * 1e5, pNow = m * R * (U / m / CV) / VTANK;
+      if (t >= T_END || pNow >= ps_pa * 0.9995) {
+        running = false; setReadout('equilibrium reached'); return;
+      }
+      setReadout('');
+      raf = window.requestAnimationFrame(step);
+    }
+
+    function start() {
+      if (raf) { window.cancelAnimationFrame(raf); raf = null; }
+      readSliders();
+      t = 0;
+      var T0 = TS, p0 = P0;
+      m = p0 * VTANK / (R * T0);      // initial mass from ideal gas
+      U = m * CV * T0;
+      ts = [t]; ps = [p0 / 1e5]; Ts = [T0]; lastMdot = 0; lastChoked = false;
+      running = true;
+      drawFrame(); setReadout('filling\u2026');
+      raf = window.requestAnimationFrame(step);
+    }
+
+    function reset() {
+      if (raf) { window.cancelAnimationFrame(raf); raf = null; }
+      running = false; t = 0;
+      m = P0 * VTANK / (R * TS); U = m * CV * TS;
+      ts = []; ps = []; Ts = []; lastMdot = 0; lastChoked = false;
+      readSliders(); drawFrame();
+      var el = document.getElementById('readout');
+      if (el) el.textContent = 'press Run to start';
+    }
+
+    // live value spans
+    function bindVal(id, span, fmt) {
+      var s = document.getElementById(id), v = document.getElementById(span);
+      if (!s || !v) return;
+      s.addEventListener('input', function () { v.textContent = fmt(parseFloat(s.value)); });
+    }
+    bindVal('ps', 'vPs', function (x) { return x.toFixed(1); });
+    bindVal('area', 'vA', function (x) { return x.toFixed(1); });
+    bindVal('cd', 'vCd', function (x) { return x.toFixed(2); });
+
+    var runBtn = document.getElementById('run'), resetBtn = document.getElementById('reset');
+    if (runBtn) runBtn.addEventListener('click', start);
+    if (resetBtn) resetBtn.addEventListener('click', reset);
+
+    // initial paint
+    readSliders(); reset();
+  }
+})();
+</script>
+
+<!-- ============================================================
+     CONTENT PROTECTION (runtime layer)
+     Intercepts copy / cut / paste / context-menu / selection /
+     drag, and extraction-related keyboard shortcuts. On a copy
+     attempt the clipboard is actively overwritten with a notice
+     rather than merely blocked, so any selection that slips
+     through yields no usable text.
+
+     Honest limitation: this runs in the browser. Disabling
+     JavaScript, "View Source", reader mode, or a screenshot/OCR
+     will still surface the text. No web page can be made truly
+     uncopyable — this raises the effort, it does not forbid it.
+     ============================================================ -->
+<script>
+(function () {
+  'use strict';
+  var NOTICE = 'This document is protected \u2014 copying is disabled.';
+
+  function block(e) { e.preventDefault(); e.stopPropagation(); return false; }
+
+  // Overwrite the clipboard rather than only blocking the event.
+  function clobber(e) {
+    try {
+      var cd = e.clipboardData || window.clipboardData;
+      if (cd) cd.setData('text/plain', NOTICE);
+    } catch (err) {}
+    return block(e);
+  }
+
+  ['copy', 'cut'].forEach(function (ev) {
+    document.addEventListener(ev, clobber, true);
+  });
+  ['paste', 'contextmenu', 'selectstart', 'dragstart', 'drag', 'dragover', 'drop'].forEach(function (ev) {
+    document.addEventListener(ev, block, true);
+  });
+
+  // Backstop: keep the live selection cleared.
+  document.addEventListener('selectionchange', function () {
+    try {
+      var s = window.getSelection && window.getSelection();
+      if (s && s.rangeCount) s.removeAllRanges();
+    } catch (err) {}
+  }, true);
+
+  // Block extraction shortcuts only; arrow-key control of the
+  // interactive sliders is untouched (no Ctrl/Cmd modifier there).
+  document.addEventListener('keydown', function (e) {
+    var k = (e.key || '').toLowerCase();
+    var mod = e.ctrlKey || e.metaKey;
+    if (k === 'f12') return block(e);                                   // devtools
+    if (mod && e.shiftKey && (k === 'i' || k === 'j' || k === 'c')) return block(e); // devtools
+    if (mod && (k === 'c' || k === 'x' || k === 'a' || k === 's' || k === 'p' || k === 'u')) return block(e);
+  }, true);
+})();
+</script>
+
+</body>
+</html>
